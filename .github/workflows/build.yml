@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -38,13 +38,25 @@ jobs:
           sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application#' android/app/src/main/AndroidManifest.xml
           sed -i 's#</application>#    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>\n    </application>#' android/app/src/main/AndroidManifest.xml
 
-      - name: Bangun APK
+      - name: Bangun APK rilis (belum bertanda tangan)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
+
+      - name: Tanda tangani APK
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KS_B64" | base64 -d > release.jks
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          cd android/app/build/outputs/apk/release
+          $BT/zipalign -p 4 app-release-unsigned.apk aligned.apk
+          $BT/apksigner sign --ks $GITHUB_WORKSPACE/release.jks --ks-pass env:KS_PASS --key-pass env:KS_PASS --ks-key-alias appnesia --out $GITHUB_WORKSPACE/appnesia-release.apk aligned.apk
+          $BT/apksigner verify --print-certs $GITHUB_WORKSPACE/appnesia-release.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: appnesia-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: appnesia-apk-rilis
+          path: appnesia-release.apkk

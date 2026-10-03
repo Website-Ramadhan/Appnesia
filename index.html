@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -53,7 +53,7 @@ html,body{transition:background-color .6s}
 <input id="q" class="search" type="search" placeholder="Cari aplikasi" aria-label="Cari aplikasi">
 <div class="chips" id="chips"></div>
 <div class="xmas" id="xmas">
-  <p>Hitung mundur Natal. Pada 25 Desember 2026.</p>
+  <p>Hitung mundur Natal, 25 Desember 2026. Saat waktunya tiba, warna aplikasi berubah jadi biru dan fitur baru terbuka otomatis: tab Terpasang, tombol Acak aplikasi, dan Salin favorit.</p>
   <div class="xg"><div><b id="xd">00</b><span>Hari</span></div><div><b id="xh">00</b><span>Jam</span></div><div><b id="xm">00</b><span>Menit</span></div><div><b id="xs">00</b><span>Detik</span></div></div>
   <button class="btn" id="remind" data-act="remind" style="display:none;margin-top:10px">Ingatkan saya saat Natal</button>
 </div>
@@ -98,9 +98,6 @@ var APPS = [
  ["Netflix","hiburan","Tonton film dan serial lewat langganan."],
  ["Vidio","hiburan","Tonton siaran langsung, film, dan serial."],
  ["Google Drive","produktif","Simpan dan bagikan file di penyimpanan cloud."],
- ["Google Maps","produktif","Cari lokasi, rute, dan info lalu lintas."],
- ["Google Translate","produktif","Terjemahkan teks, suara, dan gambar."],
- ["Notion","produktif","Catatan, tugas, dan dokumen dalam satu tempat."],
  ["Canva","produktif","Buat desain poster dan konten sosial media."],
  ["CapCut","produktif","Edit video langsung dari ponsel."],
  ["Mobile Legends","game","Game MOBA 5 lawan 5."],
@@ -118,6 +115,8 @@ var EXTRA = {
  game:"PUBG MOBILE|Call of Duty: Mobile|Genshin Impact|Honkai: Star Rail|Clash of Clans|Clash Royale|Brawl Stars|Among Us|Subway Surfers|Candy Crush Saga|Hill Climb Racing|Temple Run 2|Asphalt 9: Legends|EA SPORTS FC Mobile|eFootball|Stumble Guys|8 Ball Pool|Geometry Dash|Plants vs. Zombies 2|Angry Birds 2|Pokémon GO|Shadow Fight 4|Terraria|Real Racing 3|Need for Speed No Limits|My Talking Tom|My Talking Angela 2|Talking Tom Gold Run|Dream League Soccer|Fishing Clash|Gardenscapes|Homescapes|Royal Match|Coin Master|Township|Lords Mobile|Rise of Kingdoms|State of Survival|Ludo King|Higgs Domino Island|ZEPETO|Pixel Gun 3D|Standoff 2|Critical Ops|Arena of Valor|Wild Rift|Honor of Kings|Ragnarok M|Lineage2M|Black Desert Mobile|Sausage Man|Rules of Survival|Stardew Valley|Bloons TD 6|Monument Valley|Kingdom Rush|Dead Cells|Human: Fall Flat|The Room|Cut the Rope|Fruit Ninja|Jetpack Joyride|Crossy Road"
 };
 var DESC = {belanja:"Aplikasi belanja atau jual beli online.",keuangan:"Aplikasi layanan keuangan dan pembayaran.",perjalanan:"Aplikasi untuk perjalanan, tiket, atau transportasi.",sosial:"Aplikasi untuk berkomunikasi dan berbagi konten.",hiburan:"Aplikasi hiburan: video, musik, atau bacaan.",produktif:"Aplikasi untuk bekerja, belajar, atau kebutuhan harian.",game:"Game untuk Android."};
+var PKG = {"Shopee":"com.shopee.id","Tokopedia":"com.tokopedia.tkpd","Blibli":"blibli.mobile.commerce","Lazada":"com.lazada.android","Bukalapak":"com.bukalapak.android","DANA":"id.dana","OVO":"ovo.id","Livin' by Mandiri":"id.bmri.livin","BRImo":"id.co.bri.brimo","Bank Jago":"com.jago.digitalBanking","LinkAja":"com.telkom.mwallet","Kredivo":"com.finaccel.android","Akulaku":"io.silvrr.installment","Bibit":"com.bibit.bibitid","Stockbit":"com.stockbit.android","Binance":"com.binance.dev","PayPal":"com.paypal.android.p2pmobile","Gojek":"com.gojek.app","Grab":"com.grabtaxi.passenger","Traveloka":"com.traveloka.android","KAI Access":"com.kai.kaiticketing","Maxim":"com.taxsee.taxsee","inDrive":"sinet.startup.inDriver","Agoda":"com.agoda.mobile.consumer","Booking.com":"com.booking","Airbnb":"com.airbnb.android","Uber":"com.ubercab","Waze":"com.waze","WhatsApp":"com.whatsapp","Telegram":"org.telegram.messenger","Instagram":"com.instagram.android","Facebook":"com.facebook.katana","Messenger":"com.facebook.orca","Discord":"com.discord","Snapchat":"com.snapchat.android","Pinterest":"com.pinterest","LinkedIn":"com.linkedin.android","Reddit":"com.reddit.frontpage","Signal":"org.thoughtcrime.securesms","LINE":"jp.naver.line.android","Truecaller":"com.truecaller","YouTube":"com.google.android.youtube","Spotify":"com.spotify.music","Netflix":"com.netflix.mediaclient","Vidio":"com.vidio.android","YouTube Music":"com.google.android.apps.youtube.music","Shazam":"com.shazam.android","SoundCloud":"com.soundcloud.android","Twitch":"tv.twitch.android.app","Prime Video":"com.amazon.avod.thirdpartyclient","Google Drive":"com.google.android.apps.docs","Google Maps":"com.google.android.apps.maps","Google Translate":"com.google.android.apps.translate","Gmail":"com.google.android.gm","Google Chrome":"com.android.chrome","Notion":"notion.id","Canva":"com.canva.editor","CapCut":"com.lemon.lvoverseas","Zoom":"us.zoom.videomeetings","Microsoft Teams":"com.microsoft.teams","Duolingo":"com.duolingo","Dropbox":"com.dropbox.android","Trello":"com.trello","Slack":"com.Slack","Firefox":"org.mozilla.firefox","Brave":"com.brave.browser","PLN Mobile":"com.icon.pln123","Mobile JKN":"app.bpjs.mobile","MyPertamina":"com.dafturn.mypertamina","Halodoc":"com.linkdokter.halodoc.android","Ruangguru":"com.ruangguru.livestudents","myTelkomsel":"com.telkomsel.telkomselcm","Coursera":"org.coursera.android","Udemy":"com.udemy.android","Khan Academy":"org.khanacademy.android","Google Classroom":"com.google.android.apps.classroom","Quizlet":"com.quizlet.quizletandroid","Photomath":"com.microblink.photomath","Brainly":"co.brainly","Mobile Legends":"com.mobile.legends","Free Fire":"com.dts.freefireth","Roblox":"com.roblox.client","Minecraft":"com.mojang.minecraftpe","PUBG MOBILE":"com.tencent.ig","Genshin Impact":"com.miHoYo.GenshinImpact","Clash of Clans":"com.supercell.clashofclans","Subway Surfers":"com.kiloo.subwaysurf","Candy Crush Saga":"com.king.candycrushsaga","Among Us":"com.innersloth.spacemafia","Stumble Guys":"com.kitkagames.fallbuddies","Pokémon GO":"com.nianticlabs.pokemongo"};
+function linkApp(n){ return PKG[n] ? "https://play.google.com/store/apps/details?id="+PKG[n] : "https://play.google.com/store/search?q="+encodeURIComponent(n)+"&c=apps"; }
 Object.keys(EXTRA).forEach(function(k){ EXTRA[k].split("|").forEach(function(n){ if(!APPS.some(function(a){return a[0]===n;})) APPS.push([n,k,DESC[k]]); }); });
 var limit = 40, kat = "semua", tab = "all", fav = load("an_fav"), inst = load("an_inst");
 function load(k){ try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch(e){ return []; } }
@@ -147,14 +146,14 @@ function draw(){
     var n=esc(a[0]), isF=fav.indexOf(a[0])>-1, isI=inst.indexOf(a[0])>-1;
     return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+'</div></div></div>'+
       '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
-      '<a class="btn main" target="_blank" rel="noopener" href="https://play.google.com/store/search?q='+encodeURIComponent(a[0])+'&c=apps">Cari di Play Store</a>'+
+      '<a class="btn main" target="_blank" rel="noopener" href="'+linkApp(a[0])+'">'+(PKG[a[0]]?'Buka di Play Store':'Cari di Play Store')+'</a>'+
       '<button class="btn'+(isF?' on':'')+'" data-act="fav" data-n="'+n+'">'+(isF?'Hapus favorit':'Favorit')+'</button>'+
       '<button class="btn'+(isI?' on':'')+'" data-act="inst" data-n="'+n+'">'+(isI?'Sudah terpasang':'Tandai terpasang')+'</button>'+
       '<button class="btn" data-act="share" data-n="'+n+'">Bagikan</button></div></div>';
   }).join("") + (more ? '<button class="btn main" style="width:100%;margin-bottom:10px" data-act="more">Tampilkan lebih banyak</button>' : "");
 }
 function share(name){
-  var text = name+" — dari AppNesia. Cari di Play Store: https://play.google.com/store/search?q="+encodeURIComponent(name)+"&c=apps";
+  var text = name+" — dari AppNesia. Lihat di Play Store: "+linkApp(name);
   var S = plug("Share"); if(S){ S.share({title:name,text:text,dialogTitle:"Bagikan aplikasi"}).catch(function(){}); return; }
   if(navigator.share){ navigator.share({title:name,text:text}).catch(function(){}); return; }
   if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){toast("Tautan disalin");},function(){toast("Gagal menyalin");}); }

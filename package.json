@@ -1,6 +1,6 @@
 {
   "name": "appnesia",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "dependencies": {
     "@capacitor-community/admob": "^8.0.0",

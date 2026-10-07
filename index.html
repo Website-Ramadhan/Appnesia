@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AppNesia</title>
+<style>
+:root{--bg:#1a0808;--surface:#2a0f0f;--line:#4a1c1c;--text:#f5eaea;--muted:#b9a0a0;--accent:#ff5a4d;--amber:#f5a623;box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:calc(64px + env(safe-area-inset-top,0)) 16px calc(76px + env(safe-area-inset-bottom,0));max-width:640px;margin:0 auto}
+h1{font-size:26px;margin:20px 0 2px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:16px}
+.search:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:14px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#1a0808;font-weight:600}
+.count{color:var(--muted);font-size:13px;margin:4px 0 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card.done{border-color:var(--amber)}
+.top{display:flex;gap:12px;align-items:flex-start}
+.ico{font-size:26px;width:44px;height:44px;border-radius:12px;background:var(--bg);display:grid;place-items:center;flex:none}
+.name{font-weight:650;font-size:17px;margin:0}
+.meta{color:var(--muted);font-size:13px}
+.desc{margin:8px 0 12px;font-size:14px;color:#dcc9c9}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:14px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.main{background:var(--accent);border-color:var(--accent);color:#1a0808;font-weight:600}
+.btn.on{border-color:var(--amber);color:var(--amber)}
+.empty{text-align:center;color:var(--muted);padding:40px 12px}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
+.tab{flex:1;padding:14px 0;background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer}
+.tab.on{color:var(--accent);font-weight:650}
+.foot{color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
+.foot a{color:var(--amber)}
+.xmas{background:var(--surface);border:1px solid var(--amber);border-radius:14px;padding:14px;margin:16px 0 4px}
+.xmas p{margin:0 0 10px;font-size:14px;color:#dcc9c9}
+.xg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.xg div{background:var(--bg);border-radius:10px;padding:8px 0}
+.xg b{display:block;font-size:24px;color:var(--amber);font-variant-numeric:tabular-nums}
+.xg span{font-size:12px;color:var(--muted)}
+:root.biru{--bg:#06122b;--surface:#0d2147;--line:#1c3a72;--accent:#4da3ff;--amber:#8fd6ff}
+html,body{transition:background-color .6s}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;display:none}
+.web-bar{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0)}
+.web-in{max-width:640px;margin:0 auto;height:56px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--text);text-decoration:none}
+.brand img{width:34px;height:34px;border-radius:9px;flex:none}
+.dl{background:#7c4dff;color:#fff;border-radius:999px;padding:9px 22px;font-weight:700;font-size:15px;text-decoration:none}
+.dl:active{background:#6a3de8}
+.web-note{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 14px;font-size:14px;color:#dcc9c9}
+.kunci{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
+.kunci.on{display:flex}
+.kunci div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:360px;width:100%;text-align:center}
+.kunci h2{margin:0 0 8px;font-size:18px}
+.kunci p{margin:0 0 16px;font-size:14px;color:#dcc9c9}
+.kunci .row{justify-content:center}
+#q{opacity:.75}
+</style>
+</head>
+<body>
+<header class="web-bar"><div class="web-in">
+<a class="brand" href="./" aria-label="AppNesia">
+<img src="data:image/png;base64,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" alt="" width="34" height="34">
+<span>AppNesia</span></a>
+<a class="dl" id="unduh" href="https://www.mediafire.com/file/aigrad1u4jx2unb/appnesia-release.apk/file" rel="noopener">Unduh</a>
+</div></header>
+<div class="web-note">Ini versi web AppNesia. Aplikasi Android punya fitur tambahan: berbagi, pengingat Natal, dan penyimpanan favorit di perangkat.</div>
+<h1 style="margin-top:8px">AppNesia</h1>
+<p class="sub">Daftar aplikasi populer di Indonesia. Simpan favorit dan tandai yang sudah terpasang.</p>
+
+<input id="q" class="search" type="search" placeholder="Cari aplikasi" aria-label="Cari aplikasi">
+<div class="chips" id="chips"></div>
+<div class="xmas" id="xmas">
+  <p>Hitung mundur Natal, 25 Desember 2026. Saat waktunya tiba, warna halaman ini berubah jadi biru. Fitur baru terbuka di aplikasi AppNesia.</p>
+  <div class="xg"><div><b id="xd">00</b><span>Hari</span></div><div><b id="xh">00</b><span>Jam</span></div><div><b id="xm">00</b><span>Menit</span></div><div><b id="xs">00</b><span>Detik</span></div></div>
+  <button class="btn" id="remind" data-act="remind" style="display:none;margin-top:10px">Ingatkan saya saat Natal</button>
+</div>
+<div class="row" id="extra" style="display:none;margin:8px 0"><button class="btn" data-act="rand">Acak aplikasi</button><button class="btn" data-act="copyfav">Salin favorit</button></div>
+<div class="count" id="count"></div>
+<div id="list"></div>
+
+<div class="foot">
+  Nama dan merek aplikasi milik pemiliknya masing-masing. AppNesia tidak berafiliasi dengan mereka dan tidak menyediakan file instalasi. Tombol Play Store membuka pencarian resmi Google Play.<br>
+  Suka dengan AppNesia? <a href="https://trakteer.id/namakreator" target="_blank" rel="noopener">Dukung lewat Trakteer</a>
+</div>
+
+<div class="tabs">
+  <button class="tab on" id="tabAll" data-tab="all">Katalog</button>
+  <button class="tab" id="tabFav" data-tab="fav">Favorit</button>
+  <button class="tab" id="tabInst" data-tab="inst" style="display:none">Terpasang</button>
+</div>
+<div class="kunci" id="kunci" role="dialog" aria-modal="true"><div>
+<h2>Fitur ini ada di aplikasi</h2>
+<p>Pencarian dan kategori hanya bisa dipakai di aplikasi AppNesia. Unduh aplikasinya untuk memakai fitur ini.</p>
+<div class="row"><a class="btn main" href="https://www.mediafire.com/file/aigrad1u4jx2unb/appnesia-release.apk/file" rel="noopener">Unduh aplikasi</a><button class="btn" id="kunciTutup" type="button">Tutup</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>var KAT = [["semua","Semua"],["belanja","Belanja"],["keuangan","Keuangan"],["perjalanan","Perjalanan"],["sosial","Sosial"],["hiburan","Hiburan"],["produktif","Produktivitas"],["game","Game"]];
+var ICON = {belanja:"🛍️",keuangan:"💳",perjalanan:"🧭",sosial:"💬",hiburan:"🎬",produktif:"🗂️",game:"🎮"};
+var APPS = [
+ ["Shopee","belanja","Marketplace untuk belanja harian dengan banyak promo."],
+ ["Tokopedia","belanja","Marketplace untuk belanja dan bayar tagihan."],
+ ["Blibli","belanja","Toko online untuk elektronik, fesyen, dan kebutuhan rumah."],
+ ["DANA","keuangan","Dompet digital untuk bayar, transfer, dan top up."],
+ ["OVO","keuangan","Dompet digital untuk bayar di toko dan aplikasi mitra."],
+ ["BCA mobile","keuangan","Aplikasi mobile banking dari BCA."],
+ ["Livin' by Mandiri","keuangan","Aplikasi mobile banking dari Bank Mandiri."],
+ ["BRImo","keuangan","Aplikasi mobile banking dari Bank BRI."],
+ ["Gojek","perjalanan","Pesan ojek, mobil, dan antar makanan."],
+ ["Grab","perjalanan","Pesan transportasi dan pesan-antar makanan."],
+ ["Traveloka","perjalanan","Pesan tiket pesawat, kereta, dan hotel."],
+ ["KAI Access","perjalanan","Pesan tiket kereta api resmi KAI."],
+ ["WhatsApp","sosial","Kirim pesan, telepon, dan grup obrolan."],
+ ["Telegram","sosial","Aplikasi pesan dengan grup besar dan kanal."],
+ ["Instagram","sosial","Bagikan foto, video pendek, dan cerita."],
+ ["TikTok","sosial","Tonton dan buat video pendek."],
+ ["YouTube","hiburan","Tonton video dari berbagai kreator."],
+ ["Spotify","hiburan","Dengarkan musik dan podcast."],
+ ["Netflix","hiburan","Tonton film dan serial lewat langganan."],
+ ["Vidio","hiburan","Tonton siaran langsung, film, dan serial."],
+ ["Google Drive","produktif","Simpan dan bagikan file di penyimpanan cloud."],
+ ["Google Maps","produktif","Cari lokasi, rute, dan info lalu lintas."],
+ ["Google Translate","produktif","Terjemahkan teks, suara, dan gambar."],
+ ["Notion","produktif","Catatan, tugas, dan dokumen dalam satu tempat."],
+ ["Canva","produktif","Buat desain poster dan konten sosial media."],
+ ["CapCut","produktif","Edit video langsung dari ponsel."],
+ ["Mobile Legends","game","Game MOBA 5 lawan 5."],
+ ["Free Fire","game","Game battle royale yang ringan."],
+ ["Roblox","game","Platform game buatan pemain."],
+ ["Minecraft","game","Game membangun dan bertahan hidup di dunia balok."]
+];
+var EXTRA = {
+ belanja:"Lazada|Bukalapak|Zalora|Sociolla|Alfagift|Klik Indomaret|OLX|Carousell|Sayurbox|HappyFresh|Ruparupa|Amazon Shopping|AliExpress|Temu|SHEIN|IKEA|eBay|Etsy|Sephora",
+ keuangan:"LinkAja|Jenius|blu|SeaBank|Bank Jago|BNI Mobile Banking|OCTO Mobile|PermataMobile X|BSI Mobile|Kredivo|Akulaku|Pluang|Bibit|Ajaib|Stockbit|IPOT|Bareksa|Tokocrypto|Indodax|Pintu|Binance|PayPal|Wise|Flip",
+ perjalanan:"Tiket.com|Pegipegi|Agoda|Booking.com|Airbnb|Maxim|inDrive|Bluebird|JakLingko|Garuda Indonesia|AirAsia MOVE|Citilink|Waze|Moovit|Google Earth|TripAdvisor|Skyscanner|Uber",
+ sosial:"Facebook|Messenger|X|Threads|LINE|Discord|Snapchat|Pinterest|LinkedIn|Reddit|Signal|Viber|Skype|Tumblr|Quora|Likee|Bigo Live|Kwai|Lemon8|BeReal|KakaoTalk|WeChat|Truecaller|Medium|Goodreads",
+ hiburan:"Disney+ Hotstar|Prime Video|WeTV|iQIYI|Viu|Vision+|YouTube Music|YouTube Kids|JOOX|Deezer|SoundCloud|Shazam|Smule|TIX ID|Webtoon|iPusnas|Gramedia Digital|Kindle|Audible|Google Play Books|Mola|RCTI+|Dailymotion|Crunchyroll|Bilibili|Twitch|Wattpad",
+ produktif:"Gmail|Google Chrome|Google Calendar|Google Keep|Google Docs|Google Sheets|Google Slides|Google Photos|Google Lens|Gemini|ChatGPT|Microsoft Word|Microsoft Excel|Microsoft PowerPoint|Microsoft OneDrive|Microsoft Outlook|Microsoft 365|Microsoft Edge|Zoom|Microsoft Teams|Dropbox|Evernote|Todoist|TickTick|Trello|Slack|Asana|Adobe Acrobat Reader|Adobe Lightroom|Adobe Express|CamScanner|Adobe Scan|WPS Office|Files by Google|Snapseed|PicsArt|InShot|VN Video Editor|KineMaster|PowerDirector|Alight Motion|Remini|Duolingo|Google Classroom|Ruangguru|Zenius|Khan Academy|Coursera|Udemy|Brainly|Photomath|Quizlet|Bitwarden|1Password|NordVPN|Proton VPN|Firefox|Brave|DuckDuckGo|Opera|MyPertamina|PLN Mobile|Mobile JKN|SATUSEHAT Mobile|Halodoc|Alodokter|myTelkomsel|myXL|by.U|myIM3",
+ game:"PUBG MOBILE|Call of Duty: Mobile|Genshin Impact|Honkai: Star Rail|Clash of Clans|Clash Royale|Brawl Stars|Among Us|Subway Surfers|Candy Crush Saga|Hill Climb Racing|Temple Run 2|Asphalt 9: Legends|EA SPORTS FC Mobile|eFootball|Stumble Guys|8 Ball Pool|Geometry Dash|Plants vs. Zombies 2|Angry Birds 2|Pokémon GO|Shadow Fight 4|Terraria|Real Racing 3|Need for Speed No Limits|My Talking Tom|My Talking Angela 2|Talking Tom Gold Run|Dream League Soccer|Fishing Clash|Gardenscapes|Homescapes|Royal Match|Coin Master|Township|Lords Mobile|Rise of Kingdoms|State of Survival|Ludo King|Higgs Domino Island|ZEPETO|Pixel Gun 3D|Standoff 2|Critical Ops|Arena of Valor|Wild Rift|Honor of Kings|Ragnarok M|Lineage2M|Black Desert Mobile|Sausage Man|Rules of Survival|Stardew Valley|Bloons TD 6|Monument Valley|Kingdom Rush|Dead Cells|Human: Fall Flat|The Room|Cut the Rope|Fruit Ninja|Jetpack Joyride|Crossy Road"
+};
+var DESC = {belanja:"Aplikasi belanja atau jual beli online.",keuangan:"Aplikasi layanan keuangan dan pembayaran.",perjalanan:"Aplikasi untuk perjalanan, tiket, atau transportasi.",sosial:"Aplikasi untuk berkomunikasi dan berbagi konten.",hiburan:"Aplikasi hiburan: video, musik, atau bacaan.",produktif:"Aplikasi untuk bekerja, belajar, atau kebutuhan harian.",game:"Game untuk Android."};
+var PKG = {"Shopee":"com.shopee.id","Tokopedia":"com.tokopedia.tkpd","Blibli":"blibli.mobile.commerce","Lazada":"com.lazada.android","Bukalapak":"com.bukalapak.android","DANA":"id.dana","OVO":"ovo.id","Livin' by Mandiri":"id.bmri.livin","BRImo":"id.co.bri.brimo","Bank Jago":"com.jago.digitalBanking","LinkAja":"com.telkom.mwallet","Kredivo":"com.finaccel.android","Akulaku":"io.silvrr.installment","Bibit":"com.bibit.bibitid","Stockbit":"com.stockbit.android","Binance":"com.binance.dev","PayPal":"com.paypal.android.p2pmobile","Gojek":"com.gojek.app","Grab":"com.grabtaxi.passenger","Traveloka":"com.traveloka.android","KAI Access":"com.kai.kaiticketing","Maxim":"com.taxsee.taxsee","inDrive":"sinet.startup.inDriver","Agoda":"com.agoda.mobile.consumer","Booking.com":"com.booking","Airbnb":"com.airbnb.android","Uber":"com.ubercab","Waze":"com.waze","WhatsApp":"com.whatsapp","Telegram":"org.telegram.messenger","Instagram":"com.instagram.android","Facebook":"com.facebook.katana","Messenger":"com.facebook.orca","Discord":"com.discord","Snapchat":"com.snapchat.android","Pinterest":"com.pinterest","LinkedIn":"com.linkedin.android","Reddit":"com.reddit.frontpage","Signal":"org.thoughtcrime.securesms","LINE":"jp.naver.line.android","Truecaller":"com.truecaller","YouTube":"com.google.android.youtube","Spotify":"com.spotify.music","Netflix":"com.netflix.mediaclient","Vidio":"com.vidio.android","YouTube Music":"com.google.android.apps.youtube.music","Shazam":"com.shazam.android","SoundCloud":"com.soundcloud.android","Twitch":"tv.twitch.android.app","Prime Video":"com.amazon.avod.thirdpartyclient","Google Drive":"com.google.android.apps.docs","Google Maps":"com.google.android.apps.maps","Google Translate":"com.google.android.apps.translate","Gmail":"com.google.android.gm","Google Chrome":"com.android.chrome","Notion":"notion.id","Canva":"com.canva.editor","CapCut":"com.lemon.lvoverseas","Zoom":"us.zoom.videomeetings","Microsoft Teams":"com.microsoft.teams","Duolingo":"com.duolingo","Dropbox":"com.dropbox.android","Trello":"com.trello","Slack":"com.Slack","Firefox":"org.mozilla.firefox","Brave":"com.brave.browser","PLN Mobile":"com.icon.pln123","Mobile JKN":"app.bpjs.mobile","MyPertamina":"com.dafturn.mypertamina","Halodoc":"com.linkdokter.halodoc.android","Ruangguru":"com.ruangguru.livestudents","myTelkomsel":"com.telkomsel.telkomselcm","Coursera":"org.coursera.android","Udemy":"com.udemy.android","Khan Academy":"org.khanacademy.android","Google Classroom":"com.google.android.apps.classroom","Quizlet":"com.quizlet.quizletandroid","Photomath":"com.microblink.photomath","Brainly":"co.brainly","Mobile Legends":"com.mobile.legends","Free Fire":"com.dts.freefireth","Roblox":"com.roblox.client","Minecraft":"com.mojang.minecraftpe","PUBG MOBILE":"com.tencent.ig","Genshin Impact":"com.miHoYo.GenshinImpact","Clash of Clans":"com.supercell.clashofclans","Subway Surfers":"com.kiloo.subwaysurf","Candy Crush Saga":"com.king.candycrushsaga","Among Us":"com.innersloth.spacemafia","Stumble Guys":"com.kitkagames.fallbuddies","Pokémon GO":"com.nianticlabs.pokemongo"};
+var URLS = {}, COMM = {};
+function laporUrl(n){ return "https://github.com/Website-Ramadhan/website-ramadhan.github.io/issues/new?title="+encodeURIComponent("Laporan: "+n)+"&body="+encodeURIComponent("Aplikasi: "+n+"\nAlasan laporan:\n"); }
+function linkApp(n){ if(!PKG[n] && URLS[n]) return URLS[n]; return PKG[n] ? "https://play.google.com/store/apps/details?id="+PKG[n] : "https://play.google.com/store/search?q="+encodeURIComponent(n)+"&c=apps"; }
+Object.keys(EXTRA).forEach(function(k){ EXTRA[k].split("|").forEach(function(n){ if(!APPS.some(function(a){return a[0]===n;})) APPS.push([n,k,DESC[k]]); }); });
+var limit = 40, kat = "semua", tab = "all", fav = load("an_fav"), inst = load("an_inst");
+function load(k){ try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch(e){ return []; } }
+function plug(n){ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]; }
+function save(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} var P=plug("Preferences"); if(P) P.set({key:k,value:JSON.stringify(v)}).catch(function(){}); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function toast(t){ var el=document.getElementById("toast"); el.textContent=t; el.style.display="block"; clearTimeout(toast.t); toast.t=setTimeout(function(){el.style.display="none";},1800); }
+function toggle(arr,name){ var i=arr.indexOf(name); if(i>-1) arr.splice(i,1); else arr.push(name); }
+
+function drawChips(){
+  document.getElementById("chips").innerHTML = KAT.map(function(k){
+    return '<button class="chip'+(k[0]===kat?' on':'')+'" data-kat="'+k[0]+'">'+k[1]+'</button>';
+  }).join("");
+}
+function draw(){
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  var rows = APPS.filter(function(a){
+    return (kat==="semua"||a[1]===kat) && (!q||a[0].toLowerCase().indexOf(q)>-1) && (tab==="all"||(tab==="fav"&&fav.indexOf(a[0])>-1)||(tab==="inst"&&inst.indexOf(a[0])>-1));
+  });
+  document.getElementById("count").textContent = rows.length+" aplikasi · "+fav.length+" favorit · "+inst.length+" terpasang";
+  if(!rows.length){
+    document.getElementById("list").innerHTML = '<div class="empty">'+(tab==="fav"&&!fav.length?'Belum ada favorit. Ketuk Favorit di kartu aplikasi untuk menyimpannya di sini.':'Tidak ada aplikasi yang cocok. Coba kata kunci atau kategori lain.')+'</div>';
+    return;
+  }
+  var more = rows.length > limit;
+  document.getElementById("list").innerHTML = rows.slice(0,limit).map(function(a){
+    var n=esc(a[0]), isF=fav.indexOf(a[0])>-1, isI=inst.indexOf(a[0])>-1;
+    var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · Belum diverifikasi' : '');
+    return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+labelVerif+'</div></div></div>'+
+      '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
+      '<a class="btn main" target="_blank" rel="noopener" href="'+linkApp(a[0])+'">'+(PKG[a[0]]?'Buka di Play Store':(URLS[a[0]]?'Buka halaman aplikasi':'Cari di Play Store'))+'</a>'+
+      '<button class="btn'+(isF?' on':'')+'" data-act="fav" data-n="'+n+'">'+(isF?'Hapus favorit':'Favorit')+'</button>'+
+      '<button class="btn'+(isI?' on':'')+'" data-act="inst" data-n="'+n+'">'+(isI?'Sudah terpasang':'Tandai terpasang')+'</button>'+
+      '<button class="btn" data-act="share" data-n="'+n+'">Bagikan</button>'+(COMM[a[0]]?'<a class="btn" target="_blank" rel="noopener" href="'+laporUrl(a[0])+'">Laporkan</a>':'')+'</div></div>';
+  }).join("") + (more ? '<button class="btn main" style="width:100%;margin-bottom:10px" data-act="more">Tampilkan lebih banyak</button>' : "");
+}
+function share(name){
+  var text = name+" — dari AppNesia. Lihat aplikasinya: "+linkApp(name);
+  var S = plug("Share"); if(S){ S.share({title:name,text:text,dialogTitle:"Bagikan aplikasi"}).catch(function(){}); return; }
+  if(navigator.share){ navigator.share({title:name,text:text}).catch(function(){}); return; }
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){toast("Tautan disalin");},function(){toast("Gagal menyalin");}); }
+  else toast("Fitur bagikan belum tersedia");
+}
+var qEl=document.getElementById("q"); qEl.readOnly=true; qEl.placeholder="Cari aplikasi (khusus aplikasi)";
+function kunciBuka(){ document.getElementById("kunci").classList.add("on"); qEl.blur(); }
+document.addEventListener("click",function(e){
+  if(e.target.closest("#kunciTutup")||e.target.id==="kunci"){ document.getElementById("kunci").classList.remove("on"); return; }
+  if(e.target.closest("[data-kat],#q")){ e.preventDefault(); e.stopImmediatePropagation(); kunciBuka(); }
+},true);
+qEl.addEventListener("focus",kunciBuka);
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-kat],[data-act],[data-tab]"); if(!t) return;
+  if(t.dataset.act==="remind"){ ingatkan(); return; }
+  if(t.dataset.act==="more"){ limit+=40; draw(); return; }
+  if(t.dataset.act==="rand"){ var r=APPS[Math.floor(Math.random()*APPS.length)]; kat="semua"; drawChips(); document.getElementById("q").value=r[0]; setTab("all"); toast("Coba: "+r[0]); return; }
+  if(t.dataset.act==="copyfav"){
+    if(!fav.length){ toast("Belum ada favorit"); return; }
+    var teks="Favorit AppNesia:\n"+fav.join("\n");
+    if(navigator.clipboard){ navigator.clipboard.writeText(teks).then(function(){toast("Daftar favorit disalin");},function(){toast("Gagal menyalin");}); } else toast("Fitur salin belum tersedia");
+    return;
+  }
+  if(t.dataset.kat){ kat=t.dataset.kat; limit=40; drawChips(); draw(); return; }
+  if(t.dataset.tab){ setTab(t.dataset.tab); return; }
+  var n=t.dataset.n.replace(/&amp;/g,"&").replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,"<").replace(/&gt;/g,">");
+  if(t.dataset.act==="fav"){ toggle(fav,n); save("an_fav",fav); toast(fav.indexOf(n)>-1?"Ditambahkan ke favorit":"Dihapus dari favorit"); draw(); }
+  else if(t.dataset.act==="inst"){ toggle(inst,n); save("an_inst",inst); draw(); }
+  else if(t.dataset.act==="share"){ share(n); }
+});
+document.getElementById("q").addEventListener("input",function(){ limit=40; draw(); });
+
+var RILIS = new Date(2026,11,25,0,0,0), PREVIEW = false, natal = false;
+function setTab(x){
+  tab = x; limit = 40;
+  ["All","Fav","Inst"].forEach(function(k){ document.getElementById("tab"+k).classList.toggle("on", tab===k.toLowerCase()); });
+  draw();
+}
+function bukaNatal(){
+  natal = true; clearInterval(tickNatal.i);
+  document.documentElement.classList.add("biru");
+  document.getElementById("xmas").innerHTML = '<p><b>Selamat Natal!</b> Warna AppNesia sudah berubah jadi biru. Fitur baru hanya terbuka di aplikasi AppNesia.</p>';
+}
+function tickNatal(){
+  var now = new Date();
+  if(PREVIEW || now >= RILIS){ if(!natal) bukaNatal(); return; }
+  var d = RILIS - now;
+  function p(n){ return String(n).padStart(2,"0"); }
+  document.getElementById("xd").textContent = p(Math.floor(d/864e5));
+  document.getElementById("xh").textContent = p(Math.floor(d%864e5/36e5));
+  document.getElementById("xm").textContent = p(Math.floor(d%36e5/6e4));
+  document.getElementById("xs").textContent = p(Math.floor(d%6e4/1e3));
+}
+tickNatal.i = setInterval(tickNatal,1000); tickNatal();
+var IKLAN_TEST = true;
+function mulaiIklan(){
+  var AdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
+  if(!AdMob) return;
+  AdMob.initialize().then(function(){
+    return AdMob.showBanner({
+      adId: IKLAN_TEST ? "ca-app-pub-3940256099942544/6300978111" : "ca-app-pub-9248735969163203/5194887789",
+      adSize: "ADAPTIVE_BANNER", position: "TOP_CENTER", margin: 0, isTesting: IKLAN_TEST
+    });
+  }).catch(function(){});
+}
+function ingatkan(){
+  var N = plug("LocalNotifications");
+  if(!N){ toast("Pengingat hanya tersedia di aplikasi"); return; }
+  N.requestPermissions().then(function(r){
+    if(r.display !== "granted"){ toast("Izin notifikasi ditolak"); return; }
+    return N.schedule({notifications:[{id:2512,title:"Selamat Natal dari AppNesia",body:"Fitur baru sudah terbuka. Buka aplikasi untuk mencobanya.",schedule:{at:RILIS,allowWhileIdle:true}}]}).then(function(){ toast("Pengingat Natal diatur"); });
+  }).catch(function(){ toast("Gagal mengatur pengingat"); });
+}
+function mulaiNative(){
+  var P = plug("Preferences");
+  if(P){
+    Promise.all(["an_fav","an_inst"].map(function(k){ return P.get({key:k}); })).then(function(r){
+      var f = JSON.parse(r[0].value || "null"), i = JSON.parse(r[1].value || "null");
+      if(Array.isArray(f)) fav = f;
+      if(Array.isArray(i)) inst = i;
+      draw();
+    }).catch(function(){});
+  }
+  if(plug("LocalNotifications")) document.getElementById("remind").style.display = "inline-block";
+}
+mulaiIklan();
+mulaiNative();
+var DATA_URL = "https://website-ramadhan.github.io/apps.json";
+function terapkanData(d){
+  if(!d || !Array.isArray(d.apps)) return false;
+  var ok = d.apps.filter(function(a){
+    return a && typeof a.n==="string" && a.n.length>0 && a.n.length<=60 && ICON[a.k] && typeof a.d==="string" && a.d.length<=200 && (!a.p || /^[A-Za-z0-9._]+$/.test(a.p)) && (!a.u || (typeof a.u==="string" && a.u.length<=300 && /^https:\/\/[^\s"'<>]+$/.test(a.u)));
+  });
+  if(ok.length < 20) return false;
+  APPS = ok.map(function(a){ return [a.n, a.k, a.d]; });
+  PKG = {}; URLS = {}; COMM = {}; ok.forEach(function(a){ if(a.p) PKG[a.n] = a.p; if(a.u) URLS[a.n] = a.u; COMM[a.n] = (a.v === true) ? 2 : 1; });
+  return true;
+}
+(function(){
+  try { var c = JSON.parse(localStorage.getItem("an_data")||"null"); if(c) terapkanData(c); } catch(e){}
+  if(typeof fetch !== "function") return;
+  var ctl = typeof AbortController==="function" ? new AbortController() : null;
+  var t = setTimeout(function(){ if(ctl) ctl.abort(); }, 8000);
+  fetch(DATA_URL+"?t="+Date.now(), ctl?{signal:ctl.signal}:{}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(d){
+    clearTimeout(t);
+    if(terapkanData(d)){ try{ localStorage.setItem("an_data", JSON.stringify(d)); }catch(e){} draw(); }
+  }).catch(function(){ clearTimeout(t); });
+})();
+drawChips(); draw();
+</script>
+</body>
+</html>

@@ -149,7 +149,9 @@ function draw(){
   var more = rows.length > limit;
   document.getElementById("list").innerHTML = rows.slice(0,limit).map(function(a){
     var n=esc(a[0]), isF=fav.indexOf(a[0])>-1, isI=inst.indexOf(a[0])>-1;
-    return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+(COMM[a[0]]?' · Belum diverifikasi':'')+'</div></div></div>'+
+    // === LABEL VERIFIKASI DINAMIS ===
+    var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · Belum diverifikasi' : '');
+    return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+labelVerif+'</div></div></div>'+
       '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
       '<a class="btn main" target="_blank" rel="noopener" href="'+linkApp(a[0])+'">'+(PKG[a[0]]?'Buka di Play Store':(URLS[a[0]]?'Buka halaman aplikasi':'Cari di Play Store'))+'</a>'+
       '<button class="btn'+(isF?' on':'')+'" data-act="fav" data-n="'+n+'">'+(isF?'Hapus favorit':'Favorit')+'</button>'+
@@ -250,7 +252,7 @@ function terapkanData(d){
   });
   if(ok.length < 20) return false;
   APPS = ok.map(function(a){ return [a.n, a.k, a.d]; });
-  PKG = {}; URLS = {}; COMM = {}; ok.forEach(function(a){ if(a.p) PKG[a.n] = a.p; if(a.u) URLS[a.n] = a.u; if(a.c===1) COMM[a.n] = 1; });
+  PKG = {}; URLS = {}; COMM = {}; ok.forEach(function(a){ if(a.p) PKG[a.n] = a.p; if(a.u) URLS[a.n] = a.u; COMM[a.n] = (a.v === true) ? 2 : 1; });
   return true;
 }
 (function(){
@@ -266,4 +268,4 @@ function terapkanData(d){
 drawChips(); draw();
 </script>
 </body>
-</html>
+  </html>

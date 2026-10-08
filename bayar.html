@@ -46,8 +46,9 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 .status-box p{margin:0;color:#dcc9c9;font-size:14px}
 .spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--amber);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;vertical-align:middle;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;display:none;z-index:100;max-width:90%}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;display:none;z-index:100;max-width:90%;text-align:center}
 .toast.on{display:block}
+.toast.err{background:#ff5a4d;color:#fff}
 </style>
 </head>
 <body>
@@ -121,7 +122,7 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ============================================================
-// GANTI 2 NOMOR INI DENGAN NOMOR KAMU:
+// KONFIGURASI
 // ============================================================
 const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
@@ -134,7 +135,10 @@ const $ = id => document.getElementById(id);
 let metode = 'gopay';
 let produk = { nama: 'AppNesia Premium', deskripsi: '', harga: 2000, ikon: '⭐', id: 'premium' };
 let orderId = null;
+let pollingAktif = false;
+let statusTerakhir = null;
 
+// Ambil produk dari localStorage
 try {
   const p = JSON.parse(localStorage.getItem('an_produk') || 'null');
   if(p && p.nama) produk = p;
@@ -143,8 +147,14 @@ try {
 const rupiah = n => 'Rp' + n.toLocaleString('id-ID');
 const genOrderId = () => 'APP-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
 
+// ============================================================
+// BUAT PESANAN DI SUPABASE
+// ============================================================
 async function buatPesanan(){
   orderId = genOrderId();
+  console.log('Mencoba buat pesanan:', orderId);
+  $('orderId').textContent = 'Memuat...';
+
   const { error } = await sb.from('pesanan').insert({
     order_id: orderId,
     produk: produk.id || 'premium',
@@ -152,29 +162,65 @@ async function buatPesanan(){
     harga: produk.harga,
     status: 'pending'
   });
-  if(error){ console.error(error); toast('Gagal buat pesanan'); return; }
+
+  if(error){
+    console.error('ERROR INSERT:', error);
+    $('orderId').textContent = '-';
+    toast('Gagal: ' + (error.message || error.code || 'unknown'), true);
+    return;
+  }
+
+  console.log('Pesanan berhasil dibuat:', orderId);
   $('orderId').textContent = orderId;
   pantauStatus();
 }
 
+// ============================================================
+// PANTAU STATUS VIA POLLING
+// ============================================================
 function pantauStatus(){
   if(!orderId) return;
-  // Cek status awal
-  sb.from('pesanan').select('status').eq('order_id', orderId).single().then(({data}) => {
-    if(data) handleStatus(data.status);
-  });
-  // Polling tiap 3 detik — cek status ke Supabase
-  setInterval(function(){
-    if(!orderId) return;
-    sb.from('pesanan').select('status').eq('order_id', orderId).single().then(({data}) => {
-      if(data) handleStatus(data.status);
-    });
-  }, 3000);
+  if(pollingAktif) return;
+  pollingAktif = true;
+  console.log('Mulai polling untuk:', orderId);
+
+  // Cek awal
+  cekStatus();
+
+  // Polling tiap 3 detik
+  setInterval(cekStatus, 3000);
 }
+
+async function cekStatus(){
+  if(!orderId) return;
+  const { data, error } = await sb
+    .from('pesanan')
+    .select('status')
+    .eq('order_id', orderId)
+    .single();
+
+  if(error){
+    console.warn('Gagal cek status:', error.message);
+    return;
+  }
+  if(!data) return;
+
+  const status = String(data.status || '').toLowerCase();
+  if(status !== statusTerakhir){
+    console.log('Status berubah:', statusTerakhir, '→', status);
+    statusTerakhir = status;
+  }
+  handleStatus(status);
+}
+
+// ============================================================
+// HANDLE STATUS
+// ============================================================
 function handleStatus(status){
   if(status === 'lunas'){
     $('boxBayar').style.display = 'none';
     $('boxWait').style.display = 'none';
+    $('boxErr').style.display = 'none';
     $('boxOk').style.display = 'block';
     if(produk.id === 'premium' || produk.id === 'premium-plus'){
       localStorage.setItem('an_premium', 'aktif');
@@ -188,6 +234,7 @@ function handleStatus(status){
   } else if(status === 'gagal'){
     $('boxBayar').style.display = 'none';
     $('boxWait').style.display = 'none';
+    $('boxOk').style.display = 'none';
     $('boxErr').style.display = 'block';
     window.scrollTo(0, 0);
   } else if(status === 'menunggu'){
@@ -200,6 +247,9 @@ function handleStatus(status){
   }
 }
 
+// ============================================================
+// RENDER PRODUK
+// ============================================================
 function renderProduk(){
   $('ikonProduk').textContent = produk.ikon || '⭐';
   $('namaProduk').textContent = produk.nama;
@@ -219,6 +269,9 @@ function updateTampilan(){
   $('pilihMetode').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.metode === metode));
 }
 
+// ============================================================
+// EVENT LISTENER
+// ============================================================
 $('pilihMetode').addEventListener('click', e => {
   const t = e.target.closest('button[data-metode]');
   if(!t) return;
@@ -234,30 +287,47 @@ $('salinBtn').addEventListener('click', () => {
 });
 
 $('sudahBayarBtn').addEventListener('click', async () => {
-  if(!orderId){ toast('Pesanan belum siap'); return; }
-  const { error } = await sb.from('pesanan').update({ status: 'menunggu', updated_at: new Date().toISOString() }).eq('order_id', orderId);
-  if(error){ toast('Gagal, coba lagi'); return; }
+  if(!orderId){ toast('Pesanan belum siap', true); return; }
+  console.log('Update status → menunggu:', orderId);
+  const { error } = await sb.from('pesanan')
+    .update({ status: 'menunggu', updated_at: new Date().toISOString() })
+    .eq('order_id', orderId);
+  if(error){
+    console.error('ERROR UPDATE:', error);
+    toast('Gagal: ' + (error.message || error.code), true);
+    return;
+  }
   handleStatus('menunggu');
 });
 
 $('batalBtn').addEventListener('click', async () => {
-  if(!orderId){ toast('Pesanan belum siap'); return; }
-  const { error } = await sb.from('pesanan').update({ status: 'gagal', updated_at: new Date().toISOString() }).eq('order_id', orderId);
-  if(error){ toast('Gagal, coba lagi'); return; }
+  if(!orderId){ toast('Pesanan belum siap', true); return; }
+  console.log('Update status → gagal:', orderId);
+  const { error } = await sb.from('pesanan')
+    .update({ status: 'gagal', updated_at: new Date().toISOString() })
+    .eq('order_id', orderId);
+  if(error){
+    console.error('ERROR UPDATE:', error);
+    toast('Gagal: ' + (error.message || error.code), true);
+    return;
+  }
   handleStatus('gagal');
 });
 
-function toast(t){
+function toast(t, isErr){
   const el = $('toast');
   el.textContent = t;
-  el.className = 'toast on';
+  el.className = 'toast on' + (isErr ? ' err' : '');
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => el.className = 'toast', 2000);
+  toast.t = setTimeout(() => el.className = 'toast', 3000);
 }
 
+// ============================================================
+// START
+// ============================================================
 renderProduk();
 updateTampilan();
 buatPesanan();
 </script>
 </body>
-      </html>
+  </html>

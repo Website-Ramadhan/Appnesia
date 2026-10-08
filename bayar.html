@@ -159,15 +159,18 @@ async function buatPesanan(){
 
 function pantauStatus(){
   if(!orderId) return;
+  // Cek status awal
   sb.from('pesanan').select('status').eq('order_id', orderId).single().then(({data}) => {
     if(data) handleStatus(data.status);
   });
-  sb.channel('pesanan-' + orderId)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pesanan', filter: 'order_id=eq.' + orderId },
-      payload => { if(payload.new) handleStatus(payload.new.status); })
-    .subscribe();
+  // Polling tiap 3 detik — cek status ke Supabase
+  setInterval(function(){
+    if(!orderId) return;
+    sb.from('pesanan').select('status').eq('order_id', orderId).single().then(({data}) => {
+      if(data) handleStatus(data.status);
+    });
+  }, 3000);
 }
-
 function handleStatus(status){
   if(status === 'lunas'){
     $('boxBayar').style.display = 'none';

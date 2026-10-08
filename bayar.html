@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pembayaran - AppNesia</title>
+<style>
+:root{--bg:#1a0808;--surface:#2a0f0f;--line:#4a1c1c;--text:#f5eaea;--muted:#b9a0a0;--accent:#ff5a4d;--amber:#f5a623;--ok:#7bd88f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:20px 16px 40px;max-width:480px;margin:0 auto}
+header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0);z-index:10}
+.in{max-width:640px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px}
+.back{color:var(--text);text-decoration:none;font-size:22px}
+.brand{font-weight:700;font-size:17px}
+.wrap{margin-top:70px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.produk-info{display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.produk-info .ikon{font-size:28px;width:52px;height:52px;border-radius:12px;background:var(--bg);display:grid;place-items:center;flex:none}
+.produk-info .nama{font-weight:650;font-size:16px;margin:0}
+.produk-info .desk{color:var(--muted);font-size:13px;margin:2px 0 0}
+.harga{font-size:32px;font-weight:800;text-align:center;margin:10px 0 20px;font-variant-numeric:tabular-nums}
+.pilih{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pilih button{padding:14px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--text);font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.pilih button.on{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08)}
+.nomor-box{background:var(--bg);border:1px dashed var(--amber);border-radius:12px;padding:16px;text-align:center;margin:14px 0}
+.nomor-box .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.nomor-box .nomor{font-size:22px;font-weight:800;color:var(--amber);letter-spacing:1px;margin:6px 0 12px;font-variant-numeric:tabular-nums}
+.order-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;font-size:13px;text-align:center}
+.order-box b{color:var(--amber);font-size:15px;letter-spacing:1px}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;background:var(--accent);color:#1a0808;font:inherit;font-weight:700;font-size:15px;cursor:pointer;margin-top:8px;display:block;text-align:center;text-decoration:none}
+.btn.alt{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.ok{background:var(--ok);color:#0a1a0f}
+.btn.red{background:#ff5a4d;color:#1a0808}
+.step{display:flex;gap:12px;margin:14px 0;font-size:14px;color:#dcc9c9;line-height:1.5}
+.step b{color:var(--amber);flex:none;font-size:18px}
+.status-box{border-radius:14px;padding:24px;text-align:center;margin-bottom:14px;display:none}
+.status-box.on{display:block}
+.status-box.ok{background:linear-gradient(135deg,#1e3a26,#2a4a36);border:2px solid var(--ok)}
+.status-box.err{background:linear-gradient(135deg,#3a1e1e,#4a2020);border:2px solid #ff5a4d}
+.status-box.wait{background:var(--surface);border:2px solid var(--amber)}
+.status-box h2{margin:0 0 8px;font-size:24px}
+.status-box.ok h2{color:var(--ok)}
+.status-box.err h2{color:#ff5a4d}
+.status-box.wait h2{color:var(--amber)}
+.status-box p{margin:0;color:#dcc9c9;font-size:14px}
+.spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--amber);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;display:none;z-index:100;max-width:90%}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<header><div class="in">
+<a href="toko.html" class="back">←</a>
+<span class="brand">Pembayaran</span>
+</div></header>
+
+<div class="wrap">
+
+<div class="status-box ok" id="boxOk">
+  <h2>✅ Pembayaran Berhasil</h2>
+  <p>Terima kasih! Produk sudah aktif otomatis.</p>
+  <a class="btn ok" href="app.html" style="margin-top:16px">Buka AppNesia</a>
+</div>
+
+<div class="status-box err" id="boxErr">
+  <h2>❌ Pembayaran Gagal</h2>
+  <p>Pesanan dibatalkan. Silakan coba lagi kalau mau.</p>
+  <a class="btn red" href="toko.html" style="margin-top:16px">Kembali ke Toko</a>
+</div>
+
+<div class="status-box wait" id="boxWait">
+  <h2><span class="spinner"></span> Menunggu Konfirmasi</h2>
+  <p>Admin sedang cek pembayaran kamu. Halaman ini otomatis update saat dikonfirmasi.</p>
+  <p style="margin-top:10px;font-size:13px;color:var(--muted)">Order ID: <b id="waitOrderId">-</b></p>
+</div>
+
+<div id="boxBayar">
+  <div class="card">
+    <div class="produk-info">
+      <div class="ikon" id="ikonProduk">⭐</div>
+      <div>
+        <p class="nama" id="namaProduk">Produk</p>
+        <p class="desk" id="deskProduk">-</p>
+      </div>
+    </div>
+    <div class="harga" id="hargaProduk">Rp0</div>
+
+    <p style="font-size:14px;color:var(--muted);margin:0 0 10px">Pilih metode pembayaran:</p>
+    <div class="pilih" id="pilihMetode">
+      <button data-metode="gopay" class="on">💚 GoPay</button>
+      <button data-metode="dana">💙 DANA</button>
+    </div>
+
+    <div class="nomor-box">
+      <div class="label" id="labelMetode">Nomor GoPay</div>
+      <div class="nomor" id="nomorTujuan">08xxxxxxxxxx</div>
+      <button class="btn alt" id="salinBtn" style="margin-top:0">📋 Salin Nomor</button>
+    </div>
+
+    <div class="order-box">
+      Order ID kamu: <b id="orderId">-</b><br>
+      <span style="color:var(--muted);font-size:12px">Sertakan Order ID ini saat transfer</span>
+    </div>
+
+    <div class="step"><b>1</b><span>Transfer <b id="nominalTransfer">Rp0</b> ke nomor di atas.</span></div>
+    <div class="step"><b>2</b><span>Klik tombol <b>"Saya Sudah Bayar"</b> di bawah.</span></div>
+    <div class="step"><b>3</b><span>Tunggu admin konfirmasi. Halaman akan otomatis update.</span></div>
+
+    <button class="btn ok" id="sudahBayarBtn">✅ Saya Sudah Bayar</button>
+    <button class="btn alt" id="batalBtn">❌ Batal / Gagal Bayar</button>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+// ============================================================
+// GANTI 2 NOMOR INI DENGAN NOMOR KAMU:
+// ============================================================
+const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_P2yRN_mpmEJigBqJUwTaGQ_EOKNvO5O';
+const NOMOR_GOPAY  = '0895403096967';
+const NOMOR_DANA   = '0895403096967';
+// ============================================================
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let metode = 'gopay';
+let produk = { nama: 'AppNesia Premium', deskripsi: '', harga: 2000, ikon: '⭐', id: 'premium' };
+let orderId = null;
+
+try {
+  const p = JSON.parse(localStorage.getItem('an_produk') || 'null');
+  if(p && p.nama) produk = p;
+} catch(e){}
+
+const rupiah = n => 'Rp' + n.toLocaleString('id-ID');
+const genOrderId = () => 'APP-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
+
+async function buatPesanan(){
+  orderId = genOrderId();
+  const { error } = await sb.from('pesanan').insert({
+    order_id: orderId,
+    produk: produk.id || 'premium',
+    produk_nama: produk.nama,
+    harga: produk.harga,
+    status: 'pending'
+  });
+  if(error){ console.error(error); toast('Gagal buat pesanan'); return; }
+  $('orderId').textContent = orderId;
+  pantauStatus();
+}
+
+function pantauStatus(){
+  if(!orderId) return;
+  sb.from('pesanan').select('status').eq('order_id', orderId).single().then(({data}) => {
+    if(data) handleStatus(data.status);
+  });
+  sb.channel('pesanan-' + orderId)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pesanan', filter: 'order_id=eq.' + orderId },
+      payload => { if(payload.new) handleStatus(payload.new.status); })
+    .subscribe();
+}
+
+function handleStatus(status){
+  if(status === 'lunas'){
+    $('boxBayar').style.display = 'none';
+    $('boxWait').style.display = 'none';
+    $('boxOk').style.display = 'block';
+    if(produk.id === 'premium' || produk.id === 'premium-plus'){
+      localStorage.setItem('an_premium', 'aktif');
+    }
+    try {
+      const arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
+      if(arr.indexOf(produk.id) === -1) arr.push(produk.id);
+      localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
+    } catch(e){}
+    window.scrollTo(0, 0);
+  } else if(status === 'gagal'){
+    $('boxBayar').style.display = 'none';
+    $('boxWait').style.display = 'none';
+    $('boxErr').style.display = 'block';
+    window.scrollTo(0, 0);
+  } else if(status === 'menunggu'){
+    $('boxBayar').style.display = 'none';
+    $('boxOk').style.display = 'none';
+    $('boxErr').style.display = 'none';
+    $('boxWait').style.display = 'block';
+    $('waitOrderId').textContent = orderId;
+    window.scrollTo(0, 0);
+  }
+}
+
+function renderProduk(){
+  $('ikonProduk').textContent = produk.ikon || '⭐';
+  $('namaProduk').textContent = produk.nama;
+  $('deskProduk').textContent = produk.deskripsi || '';
+  $('hargaProduk').textContent = rupiah(produk.harga);
+  $('nominalTransfer').textContent = rupiah(produk.harga);
+}
+
+function updateTampilan(){
+  if(metode === 'gopay'){
+    $('labelMetode').textContent = 'Nomor GoPay';
+    $('nomorTujuan').textContent = NOMOR_GOPAY;
+  } else {
+    $('labelMetode').textContent = 'Nomor DANA';
+    $('nomorTujuan').textContent = NOMOR_DANA;
+  }
+  $('pilihMetode').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.metode === metode));
+}
+
+$('pilihMetode').addEventListener('click', e => {
+  const t = e.target.closest('button[data-metode]');
+  if(!t) return;
+  metode = t.dataset.metode;
+  updateTampilan();
+});
+
+$('salinBtn').addEventListener('click', () => {
+  const nomor = metode === 'gopay' ? NOMOR_GOPAY : NOMOR_DANA;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(nomor).then(() => toast('Nomor disalin'), () => toast('Nomor: ' + nomor));
+  } else toast('Nomor: ' + nomor);
+});
+
+$('sudahBayarBtn').addEventListener('click', async () => {
+  if(!orderId){ toast('Pesanan belum siap'); return; }
+  const { error } = await sb.from('pesanan').update({ status: 'menunggu', updated_at: new Date().toISOString() }).eq('order_id', orderId);
+  if(error){ toast('Gagal, coba lagi'); return; }
+  handleStatus('menunggu');
+});
+
+$('batalBtn').addEventListener('click', async () => {
+  if(!orderId){ toast('Pesanan belum siap'); return; }
+  const { error } = await sb.from('pesanan').update({ status: 'gagal', updated_at: new Date().toISOString() }).eq('order_id', orderId);
+  if(error){ toast('Gagal, coba lagi'); return; }
+  handleStatus('gagal');
+});
+
+function toast(t){
+  const el = $('toast');
+  el.textContent = t;
+  el.className = 'toast on';
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.className = 'toast', 2000);
+}
+
+renderProduk();
+updateTampilan();
+buatPesanan();
+</script>
+</body>
+      </html>

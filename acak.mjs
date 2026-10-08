@@ -21,4 +21,16 @@ const out = html.replace(/<script>([\s\S]*?)<\/script>/g, (m, code) => {
 if (n === 0) { console.error('Tidak ada blok script ditemukan'); process.exit(1); }
 fs.mkdirSync('www', { recursive: true });
 fs.writeFileSync('www/index.html', out);
+
+// === COPY FILE TAMBAHAN KE www/ ===
+const fileTambahan = ['toko.html', 'bayar.html', 'sw.js'];
+fileTambahan.forEach(function(f){
+  if(fs.existsSync(f)){
+    fs.copyFileSync(f, 'www/' + f);
+    console.log('Disalin:', f);
+  } else {
+    console.warn('Tidak ditemukan:', f);
+  }
+});
+
 console.log('Selesai, blok script diacak:', n);

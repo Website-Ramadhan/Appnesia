@@ -44,9 +44,20 @@ h1{font-size:26px;margin:20px 0 2px;letter-spacing:-.3px}
 :root.biru{--bg:#06122b;--surface:#0d2147;--line:#1c3a72;--accent:#4da3ff;--amber:#8fd6ff}
 html,body{transition:background-color .6s}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;display:none}
+/* === FITUR PERCEPAT FAVORIT === */
+.btn.fav-loading{opacity:.6;pointer-events:none}
+.btn.fav-pop{animation:favPop .3s ease}
+@keyframes favPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.toast-fav{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;display:none;z-index:100}
+.toast-fav.on{display:block;animation:favPop .3s ease}
+/* === FITUR OFFLINE === */
+.offline-bar{position:fixed;top:calc(64px + env(safe-area-inset-top,0));left:0;right:0;background:var(--amber);color:#1a0808;text-align:center;padding:6px;font-size:13px;font-weight:700;display:none;z-index:15}
+.offline-bar.on{display:block}
 </style>
 </head>
 <body>
+<div class="offline-bar" id="offlineBar">⚠️ Mode Offline — Data mungkin belum terbaru</div>
+
 <h1>AppNesia</h1>
 <p class="sub">Daftar aplikasi populer di Indonesia. Simpan favorit dan tandai yang sudah terpasang.</p>
 
@@ -72,6 +83,7 @@ html,body{transition:background-color .6s}
   <button class="tab" id="tabInst" data-tab="inst" style="display:none">Terpasang</button>
 </div>
 <div class="toast" id="toast"></div>
+<div class="toast-fav" id="toastFav"></div>
 
 <script>
 var KAT = [["semua","Semua"],["belanja","Belanja"],["keuangan","Keuangan"],["perjalanan","Perjalanan"],["sosial","Sosial"],["hiburan","Hiburan"],["produktif","Produktivitas"],["game","Game"]];
@@ -131,6 +143,18 @@ function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&a
 function toast(t){ var el=document.getElementById("toast"); el.textContent=t; el.style.display="block"; clearTimeout(toast.t); toast.t=setTimeout(function(){el.style.display="none";},1800); }
 function toggle(arr,name){ var i=arr.indexOf(name); if(i>-1) arr.splice(i,1); else arr.push(name); }
 
+/* === FITUR PERCEPAT FAVORIT === */
+function showFavToast(t){ var el=document.getElementById("toastFav"); el.textContent=t; el.className="toast-fav on"; clearTimeout(showFavToast.t); showFavToast.t=setTimeout(function(){ el.className="toast-fav"; },1200); }
+function toggleFavCepat(n,btn){
+  if(btn) btn.classList.add("fav-loading");
+  var wasFav = fav.indexOf(n) > -1;
+  toggle(fav,n);
+  save("an_fav",fav);
+  showFavToast(wasFav ? "Dihapus dari favorit" : "Ditambahkan ke favorit ✓");
+  if(btn){ btn.classList.remove("fav-loading"); btn.classList.add("fav-pop"); setTimeout(function(){ btn.classList.remove("fav-pop"); },300); }
+  draw();
+}
+
 function drawChips(){
   document.getElementById("chips").innerHTML = KAT.map(function(k){
     return '<button class="chip'+(k[0]===kat?' on':'')+'" data-kat="'+k[0]+'">'+k[1]+'</button>';
@@ -149,7 +173,6 @@ function draw(){
   var more = rows.length > limit;
   document.getElementById("list").innerHTML = rows.slice(0,limit).map(function(a){
     var n=esc(a[0]), isF=fav.indexOf(a[0])>-1, isI=inst.indexOf(a[0])>-1;
-    // === LABEL VERIFIKASI DINAMIS ===
     var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · Belum diverifikasi' : '');
     return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+labelVerif+'</div></div></div>'+
       '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
@@ -180,7 +203,7 @@ document.addEventListener("click",function(e){
   if(t.dataset.kat){ kat=t.dataset.kat; limit=40; drawChips(); draw(); return; }
   if(t.dataset.tab){ setTab(t.dataset.tab); return; }
   var n=t.dataset.n.replace(/&amp;/g,"&").replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,"<").replace(/&gt;/g,">");
-  if(t.dataset.act==="fav"){ toggle(fav,n); save("an_fav",fav); toast(fav.indexOf(n)>-1?"Ditambahkan ke favorit":"Dihapus dari favorit"); draw(); }
+  if(t.dataset.act==="fav"){ toggleFavCepat(n,t); return; }
   else if(t.dataset.act==="inst"){ toggle(inst,n); save("an_inst",inst); draw(); }
   else if(t.dataset.act==="share"){ share(n); }
 });
@@ -211,7 +234,7 @@ function tickNatal(){
   document.getElementById("xs").textContent = p(Math.floor(d%6e4/1e3));
 }
 tickNatal.i = setInterval(tickNatal,1000); tickNatal();
-var IKLAN_TEST = true; // ubah ke false setelah AdMob menyetujui aplikasi
+var IKLAN_TEST = true;
 function mulaiIklan(){
   var AdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
   if(!AdMob) return;
@@ -265,7 +288,23 @@ function terapkanData(d){
     if(terapkanData(d)){ try{ localStorage.setItem("an_data", JSON.stringify(d)); }catch(e){} draw(); }
   }).catch(function(){ clearTimeout(t); });
 })();
+
+/* === FITUR OFFLINE === */
+function updateOnline(){
+  var bar = document.getElementById("offlineBar");
+  if(bar) bar.className = "offline-bar" + (navigator.onLine ? "" : " on");
+}
+window.addEventListener("online", updateOnline);
+window.addEventListener("offline", updateOnline);
+updateOnline();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
 drawChips(); draw();
 </script>
 </body>
-  </html>
+</html>

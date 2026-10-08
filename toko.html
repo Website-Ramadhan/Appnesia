@@ -1,4 +1,4 @@
-here<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -37,6 +37,11 @@ h1{font-size:24px;margin:8px 0 4px}
 <h1>Toko AppNesia</h1>
 <p class="sub">Produk digital & jasa. Bayar via GoPay/DANA.</p>
 
+<div style="background:var(--surface);border:1px solid var(--amber);border-radius:12px;padding:14px;margin:12px 0;font-size:13px;color:#dcc9c9;line-height:1.6">
+  <b style="color:var(--amber)">⚠️ Perhatian:</b><br>
+  Konfirmasi pembayaran bisa memakan waktu <b>beberapa jam sampai 1×24 jam</b>, tergantung admin sedang online atau tidak. Mohon bersabar ya. Kalau sudah lewat 1×24 jam belum dikonfirmasi, silakan hubungi admin.
+</div>
+
 <div id="daftarProduk"></div>
 
 <p class="foot">
@@ -60,22 +65,22 @@ var PRODUK = [
   {
     id: "fitur stabil",
     ikon: "💎",
-    nama: "tombol fitur berfungsi stabil",
+    nama: "Tombol fitur berfungsi stabil",
     deskripsi: "Semua fitur Premium + dukungan prioritas.",
     harga: 27000
   },
   {
     id: "ubah halaman jadi warna sesuka",
     ikon: "🌐",
-    nama: "ubah warna halaman",
-    deskripsi: "Website 1 halaman untuk UMKM/toko online.",
+    nama: "Ubah warna halaman",
+    deskripsi: "Ganti warna tampilan AppNesia sesuai selera.",
     harga: 34000
   },
   {
     id: "akun developer plus",
     ikon: "🤖",
-    nama: "akun developer plus",
-    deskripsi: "Bot WA auto-reply sederhana untuk usaha.",
+    nama: "Akun developer plus",
+    deskripsi: "Fitur tambahan untuk developer AppNesia.",
     harga: 85000
   }
 ];
@@ -109,4 +114,4 @@ document.addEventListener("click", function(e){
 render();
 </script>
 </body>
-  </html>
+</html>

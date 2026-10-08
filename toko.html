@@ -1,0 +1,112 @@
+here<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Toko - AppNesia</title>
+<style>
+:root{--bg:#1a0808;--surface:#2a0f0f;--line:#4a1c1c;--text:#f5eaea;--muted:#b9a0a0;--accent:#ff5a4d;--amber:#f5a623;--ok:#7bd88f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:calc(64px + env(safe-area-inset-top,0)) 16px 40px;max-width:640px;margin:0 auto}
+header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0);z-index:10}
+.in{max-width:640px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px}
+.back{color:var(--text);text-decoration:none;font-size:22px;line-height:1}
+.brand{font-weight:700;font-size:18px;flex:1}
+.wrap{margin-top:60px}
+h1{font-size:24px;margin:8px 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+.produk{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start}
+.produk .ikon{font-size:28px;width:52px;height:52px;border-radius:12px;background:var(--bg);display:grid;place-items:center;flex:none}
+.produk .info{flex:1;min-width:0}
+.produk .nama{font-weight:650;font-size:16px;margin:0 0 4px}
+.produk .desk{color:#dcc9c9;font-size:13px;margin:0 0 8px}
+.produk .harga{color:var(--amber);font-weight:700;font-size:16px}
+.produk .beli{background:var(--accent);color:#1a0808;border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;flex:none}
+.badge{display:inline-block;background:var(--amber);color:#1a0808;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:30px;line-height:1.6}
+</style>
+</head>
+<body>
+<header><div class="in">
+<a href="app.html" class="back">←</a>
+<span class="brand">🛒 Toko AppNesia</span>
+</div></header>
+
+<div class="wrap">
+<h1>Toko AppNesia</h1>
+<p class="sub">Produk digital & jasa. Bayar via GoPay/DANA.</p>
+
+<div id="daftarProduk"></div>
+
+<p class="foot">
+Setelah transfer, klik "Saya Sudah Bayar" di halaman pembayaran. Produk otomatis aktif setelah admin konfirmasi.
+</p>
+</div>
+
+<script>
+// ============================================================
+// DAFTAR PRODUK
+// ============================================================
+var PRODUK = [
+  {
+    id: "premium",
+    ikon: "⭐",
+    nama: "AppNesia Premium",
+    deskripsi: "Buka fitur favorit instan & akses offline.",
+    harga: 19000,
+    badge: "Populer"
+  },
+  {
+    id: "fitur stabil",
+    ikon: "💎",
+    nama: "tombol fitur berfungsi stabil",
+    deskripsi: "Semua fitur Premium + dukungan prioritas.",
+    harga: 27000
+  },
+  {
+    id: "ubah halaman jadi warna sesuka",
+    ikon: "🌐",
+    nama: "ubah warna halaman",
+    deskripsi: "Website 1 halaman untuk UMKM/toko online.",
+    harga: 34000
+  },
+  {
+    id: "akun developer plus",
+    ikon: "🤖",
+    nama: "akun developer plus",
+    deskripsi: "Bot WA auto-reply sederhana untuk usaha.",
+    harga: 85000
+  }
+];
+
+function rupiah(n){ return "Rp" + n.toLocaleString("id-ID"); }
+
+function render(){
+  document.getElementById("daftarProduk").innerHTML = PRODUK.map(function(p){
+    var badge = p.badge ? '<span class="badge">' + p.badge + '</span>' : '';
+    return '<div class="produk">' +
+      '<div class="ikon">' + p.ikon + '</div>' +
+      '<div class="info">' +
+        '<p class="nama">' + p.nama + badge + '</p>' +
+        '<p class="desk">' + p.deskripsi + '</p>' +
+        '<div class="harga">' + rupiah(p.harga) + '</div>' +
+      '</div>' +
+      '<button class="beli" data-id="' + p.id + '">Beli</button>' +
+    '</div>';
+  }).join("");
+}
+
+document.addEventListener("click", function(e){
+  var t = e.target.closest("button.beli");
+  if(!t) return;
+  var p = PRODUK.filter(function(x){ return x.id === t.dataset.id; })[0];
+  if(!p) return;
+  try { localStorage.setItem("an_produk", JSON.stringify(p)); } catch(err){}
+  location.href = "bayar.html";
+});
+
+render();
+</script>
+</body>
+  </html>

@@ -34,9 +34,6 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .box.on{display:block}
 .count{float:right;color:var(--muted);font-weight:400;font-size:12px}
 .foot{color:var(--muted);font-size:12px;margin-top:28px}
-.user-bar{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:12px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px}
-.user-bar b{color:var(--amber)}
-.user-bar button{background:transparent;border:1px solid var(--line);color:var(--text);padding:6px 12px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -68,23 +65,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 <li>Kiriman ditolak otomatis jika nama atau tautannya sudah ada, atau tautannya memakai pemendek tautan (bit.ly dan sejenisnya).</li>
 </ul></div>
 
-<!-- ============ KOTAK LOGIN (muncul kalau belum login) ============ -->
-<div id="loginBox" class="card" style="display:none">
-<h2 style="margin-top:0">Masuk dulu untuk kirim aplikasi</h2>
-<p>Kamu harus punya akun developer AppNesia.</p>
-<a class="btn" href="login.html">Masuk / Daftar</a>
-</div>
-
-<!-- ============ PEMBUKA FORM WRAP (muncul kalau sudah login) ============ -->
-<div id="formWrap" style="display:none">
-
-<!-- ============ BAR USER (info login + logout) ============ -->
-<div class="user-bar" id="userBar" style="display:none">
-<span>Masuk sebagai <b id="userEmail"></b></span>
-<button id="logout">Keluar</button>
-</div>
-
-<h2>Formulir</h2> <form id="f" class="card" novalidate>
+<h2>Formulir</h2>
+<form id="f" class="card" novalidate>
 <label for="n">Nama aplikasi <span class="count" id="cn">0/60</span></label>
 <input type="text" id="n" maxlength="60" autocomplete="off">
 <div class="err" id="en"></div>
@@ -133,54 +115,42 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 <a class="btn" id="kirim" target="_blank" rel="noopener" href="#">Buka di GitHub</a>
 </div>
 
-</div><!-- ============ PENUTUP FORM WRAP ============ -->
-
 <p class="foot">AppNesia tidak berafiliasi dengan Google, Play Store, atau developer lain yang namanya muncul di katalog. Nama dan merek aplikasi milik pemiliknya masing-masing.</p>
 </div></main>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_P2yRN_mpmEJigBqJUwTaGQ_EOKNvO5O';
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ⚠️ YANG DIUBAH: REPO sekarang mengarah ke website-ramadhan.github.io
-const REPO = "Website-Ramadhan/website-ramadhan.github.io";
-
-const KAT = ["belanja","keuangan","perjalanan","sosial","hiburan","produktif","game"];
-function $(id){ return document.getElementById(id); }
-function cnt(){ $("cn").textContent = $("n").value.length+"/60"; $("cd").textContent = $("d").value.length+"/200"; }
-function bersih(s){ return s.replace(/[\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").trim(); }
-
-// ==== CEK LOGIN SAAT HALAMAN DIBUKA ====
-async function cekLogin(){
-  const { data } = await sb.auth.getUser();
-  if(data && data.user){
-    $("loginBox").style.display = "none";
-    $("formWrap").style.display = "block";
-    $("userBar").style.display = "flex";
-    $("userEmail").textContent = data.user.email;
-  } else {
-    $("loginBox").style.display = "block";
-    $("formWrap").style.display = "none";
-  }
-}
-cekLogin();
-
-$("logout").addEventListener("click", async () => {
-  await sb.auth.signOut();
-  location.reload();
+<script>
+// ============================================================
+// CEK LOGIN — WAJIB LOGIN DULU SEBELUM KIRIM APLIKASI
+// ============================================================
+import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm').then(m => {
+  const sb = m.createClient(
+    'https://ddnqfpeszktuvsypseyc.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0'
+  );
+  sb.auth.getUser().then(({ data }) => {
+    if (!data || !data.user) {
+      alert('Kamu harus login dulu untuk mengirim aplikasi.');
+      location.href = 'login.html';
+    } else {
+      const info = document.createElement('div');
+      info.style.cssText = 'position:fixed;top:70px;right:12px;background:#2a0f0f;border:1px solid #4a1c1c;padding:6px 12px;border-radius:999px;font-size:12px;color:#b9a0a0;z-index:100';
+      info.textContent = '👤 ' + data.user.email;
+      document.body.appendChild(info);
+    }
+  });
 });
 
-sb.auth.onAuthStateChange(() => cekLogin());
-
-// ==== FORM ====
+// ============================================================
+// KODE ASLI developer.html
+// ============================================================
+var REPO = "Website-Ramadhan/Appnesia";
+var KAT = ["belanja","keuangan","perjalanan","sosial","hiburan","produktif","game"];
+function $(id){ return document.getElementById(id); }
+function cnt(){ $("cn").textContent = $("n").value.length+"/60"; $("cd").textContent = $("d").value.length+"/200"; }
 $("n").addEventListener("input",cnt); $("d").addEventListener("input",cnt);
-$("f").addEventListener("submit",async function(e){
+function bersih(s){ return s.replace(/[\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").trim(); }
+$("f").addEventListener("submit",function(e){
   e.preventDefault();
-  var { data } = await sb.auth.getUser();
-  if(!data || !data.user){ alert("Kamu harus login dulu."); location.href = "login.html"; return; }
   var n=bersih($("n").value), dev=bersih($("dev").value), k=$("k").value, d=bersih($("d").value), u=$("u").value.trim(), p=$("p").value.trim();
   var bad=false;
   function err(id,t){ $(id).textContent=t; if(t) bad=true; }
@@ -201,4 +171,4 @@ $("f").addEventListener("submit",async function(e){
 });
 </script>
 </body>
-  </html>
+                         </html>

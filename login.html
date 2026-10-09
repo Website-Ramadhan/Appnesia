@@ -44,7 +44,6 @@ button.alt{background:transparent;border:1px solid var(--line);color:var(--text)
 
 <div class="wrap">
 
-<!-- ============ FORM LOGIN / DAFTAR ============ -->
 <div id="formBox">
 <h1 id="judul">Masuk Developer</h1>
 <p class="sub" id="subjudul">Masuk untuk mengirim aplikasi ke AppNesia</p>
@@ -69,7 +68,6 @@ button.alt{background:transparent;border:1px solid var(--line);color:var(--text)
 <p class="foot">Dengan masuk, kamu setuju dengan aturan AppNesia.</p>
 </div>
 
-<!-- ============ DASHBOARD (setelah login) ============ -->
 <div id="dashBox" class="dash" style="display:none;margin-top:60px">
 <h1 style="color:var(--ok)">✓ Sudah Masuk</h1>
 <p>Halo, <b id="userEmail"></b>!</p>
@@ -84,11 +82,10 @@ button.alt{background:transparent;border:1px solid var(--line);color:var(--text)
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ============================================================
-// GANTI 2 BARIS INI dengan data dari Supabase kamu
-// (Settings → API di dashboard Supabase)
+// KONFIGURASI SUPABASE
 // ============================================================
 const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_P2yRN_mpmEJigBqJUwTaGQ_EOKNvO5O';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
 // ============================================================
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -102,7 +99,6 @@ function showMsg(text, ok){
 }
 function clearMsg(){ $('msg').className = 'msg'; }
 
-// Ganti mode login <-> daftar
 $('switchBtn').addEventListener('click', () => {
   mode = mode === 'login' ? 'daftar' : 'login';
   $('judul').textContent = mode === 'login' ? 'Masuk Developer' : 'Daftar Developer';
@@ -113,7 +109,6 @@ $('switchBtn').addEventListener('click', () => {
   clearMsg();
 });
 
-// Tombol submit
 $('submit').addEventListener('click', async () => {
   const email = $('email').value.trim();
   const pass = $('pass').value;
@@ -157,17 +152,17 @@ $('submit').addEventListener('click', async () => {
   $('submit').textContent = mode === 'login' ? 'Masuk' : 'Daftar';
 });
 
-// Logout
 $('logout').addEventListener('click', async () => {
   await sb.auth.signOut();
+  localStorage.removeItem('an_email');
   location.reload();
 });
 
-// Cek status login saat halaman dibuka
 async function tampilkanDash(){
   const { data } = await sb.auth.getUser();
   if(data && data.user){
     $('userEmail').textContent = data.user.email;
+    localStorage.setItem('an_email', data.user.email);
     $('formBox').style.display = 'none';
     $('dashBox').style.display = 'block';
   } else {
@@ -177,10 +172,10 @@ async function tampilkanDash(){
 }
 tampilkanDash();
 
-// Kalau user logout dari tab lain, otomatis update
 sb.auth.onAuthStateChange((_event, session) => {
   if(session && session.user){
     $('userEmail').textContent = session.user.email;
+    localStorage.setItem('an_email', session.user.email);
     $('formBox').style.display = 'none';
     $('dashBox').style.display = 'block';
   } else {
@@ -190,4 +185,4 @@ sb.auth.onAuthStateChange((_event, session) => {
 });
 </script>
 </body>
-</html>
+  </html>

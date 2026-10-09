@@ -29,6 +29,7 @@ h1{font-size:26px;margin:20px 0 2px;letter-spacing:-.3px}
 .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:14px;cursor:pointer;text-decoration:none;display:inline-block}
 .btn.main{background:var(--accent);border-color:var(--accent);color:#1a0808;font-weight:600}
 .btn.on{border-color:var(--amber);color:var(--amber)}
+.btn.google{border-color:#4285f4;color:#4285f4}
 .empty{text-align:center;color:var(--muted);padding:40px 12px}
 .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
 .tab{flex:1;padding:14px 0;background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer}
@@ -44,15 +45,127 @@ h1{font-size:26px;margin:20px 0 2px;letter-spacing:-.3px}
 :root.biru{--bg:#06122b;--surface:#0d2147;--line:#1c3a72;--accent:#4da3ff;--amber:#8fd6ff}
 html,body{transition:background-color .6s}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;display:none}
-/* === FITUR PERCEPAT FAVORIT === */
 .btn.fav-loading{opacity:.6;pointer-events:none}
 .btn.fav-pop{animation:favPop .3s ease}
 @keyframes favPop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
 .toast-fav{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;display:none;z-index:100}
 .toast-fav.on{display:block;animation:favPop .3s ease}
-/* === FITUR OFFLINE === */
 .offline-bar{position:fixed;top:calc(64px + env(safe-area-inset-top,0));left:0;right:0;background:var(--amber);color:#1a0808;text-align:center;padding:6px;font-size:13px;font-weight:700;display:none;z-index:15}
 .offline-bar.on{display:block}
+
+/* === VIDEO IKLAN SPONSOR (EMBED) === */
+.ads-video{
+  background:linear-gradient(135deg,#1a0808,#2a0f0f);
+  border:1px solid var(--amber);
+  border-radius:12px;
+  margin:12px 0;
+  overflow:hidden;
+  position:relative;
+}
+.ads-video .video-thumb{
+  position:relative;
+  height:180px;
+  background:linear-gradient(135deg,#ff6b35,#f7c948);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  overflow:hidden;
+}
+.ads-video .video-thumb::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center, transparent 30%, rgba(0,0,0,.5) 100%);
+}
+.ads-video .play-btn{
+  font-size:56px;
+  z-index:2;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+  transition:transform .2s;
+}
+.ads-video .video-thumb:active .play-btn{transform:scale(.9)}
+.ads-video .video-label{
+  position:absolute;
+  top:8px;left:8px;
+  background:rgba(245,166,35,.95);
+  color:#1a0808;
+  font-size:10px;
+  font-weight:800;
+  padding:3px 8px;
+  border-radius:4px;
+  letter-spacing:.5px;
+  z-index:2;
+}
+.ads-video .video-durasi{
+  position:absolute;
+  bottom:8px;right:8px;
+  background:rgba(0,0,0,.8);
+  color:#fff;
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:4px;
+  z-index:2;
+}
+.ads-video .video-info{
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.ads-video .video-info .g-logo{font-size:22px;flex:none}
+.ads-video .video-info .g-text{flex:1;min-width:0}
+.ads-video .video-info .g-text b{
+  display:block;
+  font-size:14px;
+  color:var(--text);
+  margin-bottom:2px;
+}
+.ads-video .video-info .g-text span{
+  font-size:12px;
+  color:var(--muted);
+}
+.ads-video .video-info .g-arrow{color:var(--accent);font-size:18px}
+#youtubeFrame{
+  display:none;
+  width:100%;
+  height:220px;
+  border:0;
+  background:#000;
+}
+#youtubeFrame.on{display:block}
+
+/* === BANNER PROMO DI KARTU APLIKASI === */
+.promo-card{
+  background:linear-gradient(90deg, rgba(66,133,244,.1), rgba(52,168,83,.1));
+  border:1px dashed rgba(66,133,244,.4);
+  border-radius:10px;
+  padding:8px 12px;
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  font-size:12px;
+}
+.promo-card .p-ikon{font-size:20px;flex:none}
+.promo-card .p-info{flex:1;min-width:0}
+.promo-card .p-info b{
+  display:block;
+  color:var(--text);
+  font-size:13px;
+  margin-bottom:1px;
+}
+.promo-card .p-info span{color:var(--muted);font-size:11px}
+.promo-card .p-badge{
+  background:#4285f4;
+  color:#fff;
+  font-size:9px;
+  font-weight:700;
+  padding:2px 6px;
+  border-radius:4px;
+  flex:none;
+  letter-spacing:.3px;
+}
 </style>
 </head>
 <body>
@@ -60,6 +173,27 @@ html,body{transition:background-color .6s}
 
 <h1>AppNesia</h1>
 <p class="sub">Daftar aplikasi populer di Indonesia. Simpan favorit dan tandai yang sudah terpasang.</p>
+
+<!-- === VIDEO IKLAN SPONSOR (EMBED YOUTUBE) === -->
+<div class="ads-video" id="adsVideo">
+  <div class="video-thumb" id="videoThumb" onclick="putarVideo()">
+    <span class="video-label">IKLAN</span>
+    <span class="video-durasi">SPONSOR</span>
+    <span class="play-btn">▶️</span>
+  </div>
+  <iframe id="youtubeFrame"
+          src=""
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowfullscreen></iframe>
+  <div class="video-info">
+    <span class="g-logo">🛒</span>
+    <div class="g-text">
+      <b>Shopee 10.10 Brands Festival</b>
+      <span>Diskon hingga 99% di Midnight Sale</span>
+    </div>
+    <span class="g-arrow">→</span>
+  </div>
+</div>
 
 <input id="q" class="search" type="search" placeholder="Cari aplikasi" aria-label="Cari aplikasi">
 <div class="chips" id="chips"></div>
@@ -77,13 +211,12 @@ html,body{transition:background-color .6s}
   Suka dengan AppNesia? <a href="https://trakteer.id/namakreator" target="_blank" rel="noopener">Dukung lewat Trakteer</a>
 </div>
 
- <div class="tabs">
+<div class="tabs">
   <button class="tab on" id="tabAll" data-tab="all">Katalog</button>
   <button class="tab" id="tabFav" data-tab="fav">Favorit</button>
   <button class="tab" id="tabInst" data-tab="inst" style="display:none">Terpasang</button>
   <a class="tab" href="toko.html" style="text-decoration:none;text-align:center">🛒 Toko</a>
- </div>
-
+</div>
 
 <div class="toast" id="toast"></div>
 <div class="toast-fav" id="toastFav"></div>
@@ -158,6 +291,46 @@ function toggleFavCepat(n,btn){
   draw();
 }
 
+/* ============================================================
+   VIDEO IKLAN SPONSOR — EMBED YOUTUBE
+   ============================================================ */
+var VIDEO_ID = "t0ZHZRtLLA4";
+var videoTerputar = false;
+
+function putarVideo(){
+  var frame = document.getElementById("youtubeFrame");
+  var thumb = document.getElementById("videoThumb");
+  if(!frame || !thumb) return;
+  if(videoTerputar) return;
+  frame.src = "https://www.youtube.com/embed/" + VIDEO_ID + "?autoplay=1&rel=0&modestbranding=1&playsinline=1";
+  frame.classList.add("on");
+  thumb.style.display = "none";
+  videoTerputar = true;
+}
+
+/* ============================================================
+   BANNER PROMO DI SETIAP KARTU APLIKASI
+   ============================================================ */
+var PROMO_CARDS = [
+  { ikon:"▶️", nama:"YouTube", desk:"Tonton video favoritmu", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.google.android.youtube" },
+  { ikon:"📷", nama:"Google Photos", desk:"Backup foto otomatis", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.google.android.apps.photos" },
+  { ikon:"🗺️", nama:"Google Maps", desk:"Cari lokasi terdekat", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.google.android.apps.maps" },
+  { ikon:"🎵", nama:"YouTube Music", desk:"Streaming musik gratis", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.google.android.apps.youtube.music" },
+  { ikon:"📧", nama:"Gmail", desk:"Email gratis dari Google", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.google.android.gm" },
+  { ikon:"🛒", nama:"Shopee", desk:"Belanja online promo tiap hari", badge:"PROMO", link:"https://play.google.com/store/apps/details?id=com.shopee.id" },
+  { ikon:"🎬", nama:"Netflix", desk:"Nonton film & serial", badge:"PROMO", link:"https://play.google.com/store/apps/details?id=com.netflix.mediaclient" },
+  { ikon:"📱", nama:"WhatsApp", desk:"Chat gratis ke seluruh dunia", badge:"GRATIS", link:"https://play.google.com/store/apps/details?id=com.whatsapp" }
+];
+
+function renderPromoCard(seed){
+  var p = PROMO_CARDS[Math.abs(seed) % PROMO_CARDS.length];
+  return '<a class="promo-card" href="'+p.link+'" target="_blank" rel="noopener">'+
+    '<span class="p-ikon">'+p.ikon+'</span>'+
+    '<span class="p-info"><b>'+p.nama+'</b><span>'+p.desk+'</span></span>'+
+    '<span class="p-badge">'+p.badge+'</span>'+
+  '</a>';
+}
+
 function drawChips(){
   document.getElementById("chips").innerHTML = KAT.map(function(k){
     return '<button class="chip'+(k[0]===kat?' on':'')+'" data-kat="'+k[0]+'">'+k[1]+'</button>';
@@ -177,12 +350,14 @@ function draw(){
   document.getElementById("list").innerHTML = rows.slice(0,limit).map(function(a){
     var n=esc(a[0]), isF=fav.indexOf(a[0])>-1, isI=inst.indexOf(a[0])>-1;
     var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · Belum diverifikasi' : '');
+    var seed = (a[0].length * 7) + (a[1].length * 3);
     return '<div class="card'+(isI?' done':'')+'"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+(isI?' · Terpasang':'')+labelVerif+'</div></div></div>'+
       '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
       '<a class="btn main" target="_blank" rel="noopener" href="'+linkApp(a[0])+'">'+(PKG[a[0]]?'Buka di Play Store':(URLS[a[0]]?'Buka halaman aplikasi':'Cari di Play Store'))+'</a>'+
       '<button class="btn'+(isF?' on':'')+'" data-act="fav" data-n="'+n+'">'+(isF?'Hapus favorit':'Favorit')+'</button>'+
       '<button class="btn'+(isI?' on':'')+'" data-act="inst" data-n="'+n+'">'+(isI?'Sudah terpasang':'Tandai terpasang')+'</button>'+
-      '<button class="btn" data-act="share" data-n="'+n+'">Bagikan</button>'+(COMM[a[0]]?'<a class="btn" target="_blank" rel="noopener" href="'+laporUrl(a[0])+'">Laporkan</a>':'')+'</div></div>';
+      '<button class="btn" data-act="share" data-n="'+n+'">Bagikan</button>'+(COMM[a[0]]?'<a class="btn" target="_blank" rel="noopener" href="'+laporUrl(a[0])+'">Laporkan</a>':'')+
+      '</div>' + renderPromoCard(seed) + '</div>';
   }).join("") + (more ? '<button class="btn main" style="width:100%;margin-bottom:10px" data-act="more">Tampilkan lebih banyak</button>' : "");
 }
 function share(name){
@@ -237,6 +412,10 @@ function tickNatal(){
   document.getElementById("xs").textContent = p(Math.floor(d%6e4/1e3));
 }
 tickNatal.i = setInterval(tickNatal,1000); tickNatal();
+
+/* === IKLAN ADMOB DINONAKTIFKAN SEMENTARA === */
+// Untuk mengaktifkan lagi: uncomment blok di bawah + aktifkan "mulaiIklan();"
+/*
 var IKLAN_TEST = true;
 function mulaiIklan(){
   var AdMob = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
@@ -248,6 +427,8 @@ function mulaiIklan(){
     });
   }).catch(function(){});
 }
+*/
+
 function ingatkan(){
   var N = plug("LocalNotifications");
   if(!N){ toast("Pengingat hanya tersedia di aplikasi"); return; }
@@ -268,7 +449,7 @@ function mulaiNative(){
   }
   if(plug("LocalNotifications")) document.getElementById("remind").style.display = "inline-block";
 }
-mulaiIklan();
+// mulaiIklan(); // Iklan AdMob test dinonaktifkan — diganti video iklan sponsor
 mulaiNative();
 var DATA_URL = "https://website-ramadhan.github.io/apps.json";
 function terapkanData(d){
@@ -310,4 +491,4 @@ if('serviceWorker' in navigator){
 drawChips(); draw();
 </script>
 </body>
-</html>
+</html>  

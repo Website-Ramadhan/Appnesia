@@ -294,7 +294,11 @@ function cobaUlang(){
   if(navigator.onLine){ tampilkanOnline(); } else { tampilkanOffline(); }
 }
 function muatDataUlang(){
-  if(typeof fetch !== "function") return;
+  if(typeof fetch !== "function"){
+    // Kalau fetch nggak didukung, langsung sembunyikan loading
+    drawChips(); draw(); sembunyikanLoading();
+    return;
+  }
   var ctl = typeof AbortController==="function" ? new AbortController() : null;
   var t = setTimeout(function(){ if(ctl) ctl.abort(); }, 8000);
   fetch(DATA_URL+"?t="+Date.now(), ctl?{signal:ctl.signal}:{}).then(function(r){
@@ -306,12 +310,41 @@ function muatDataUlang(){
       try{ localStorage.setItem("an_data", JSON.stringify(d)); }catch(e){}
       drawChips();
       draw();
-      sembunyikanLoading();
-    } else { tampilkanOffline(); }
+      // Delay sedikit biar rendering selesai dulu
+      setTimeout(sembunyikanLoading, 300);
+    } else {
+      // Data nggak valid, tapi tetap coba pakai cache
+      try {
+        var cached = JSON.parse(localStorage.getItem("an_data")||"null");
+        if(cached && terapkanData(cached)){
+          drawChips(); draw();
+          setTimeout(sembunyikanLoading, 300);
+          return;
+        }
+      } catch(e){}
+      tampilkanOffline();
+    }
   }).catch(function(){
     clearTimeout(t);
-    if(!navigator.onLine){ tampilkanOffline(); }
-    else { sembunyikanLoading(); }
+    // Kalau fetch gagal, coba pakai cache dulu
+    try {
+      var cached = JSON.parse(localStorage.getItem("an_data")||"null");
+      if(cached && terapkanData(cached)){
+        drawChips(); draw();
+        setTimeout(sembunyikanLoading, 300);
+        return;
+      }
+    } catch(e){}
+    if(!navigator.onLine){
+    tampilkanOffline();
+ }  else {
+    tampilkanLoading();
+    drawChips();
+    draw();
+    muatDataUlang();
+ }
+  
+    { drawChips(); draw(); sembunyikanLoading(); }
   });
 }
 window.addEventListener("offline", function(){ tampilkanOffline(); });

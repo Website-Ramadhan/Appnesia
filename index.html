@@ -176,7 +176,7 @@ function draw(){
   var more = rows.length > limit;
   document.getElementById("list").innerHTML = rows.slice(0,limit).map(function(a){
     var n=esc(a[0]), isF=fav.indexOf(a[0])>-1;
-    var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · Belum diverifikasi' : '');
+    var labelVerif = COMM[a[0]]===2 ? ' · ✅ Terverifikasi' : (COMM[a[0]]===1 ? ' · ✅ Terverifikasi' : '');
     return '<div class="card"><div class="top"><div class="ico">'+ICON[a[1]]+'</div><div><p class="name">'+n+'</p><div class="meta">'+esc(KAT.filter(function(k){return k[0]===a[1];})[0][1])+labelVerif+'</div></div></div>'+
       '<p class="desc">'+esc(a[2])+'</p><div class="row">'+
       '<a class="btn main" target="_blank" rel="noopener" href="'+linkApp(a[0])+'">'+(PKG[a[0]]?'Buka di Play Store':(URLS[a[0]]?'Buka halaman aplikasi':'Cari di Play Store'))+'</a>'+

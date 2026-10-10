@@ -220,15 +220,14 @@ function handleStatus(status){
   if(status === 'lunas'){
     $('boxBayar').style.display = 'none';
     $('boxWait').style.display = 'none';
-    $('boxErr').style.display = 'none';
     $('boxOk').style.display = 'block';
-    if(produk.id === 'premium' || produk.id === 'premium-plus'){
-      localStorage.setItem('an_premium', 'aktif');
-    }
+    // Simpan produk yang sudah dibeli
     try {
-      const arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
+      var arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
       if(arr.indexOf(produk.id) === -1) arr.push(produk.id);
       localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
+      localStorage.setItem('an_produk_terakhir', produk.id);
+      console.log('Produk tersimpan:', arr);
     } catch(e){}
     window.scrollTo(0, 0);
   } else if(status === 'gagal'){
@@ -330,4 +329,4 @@ updateTampilan();
 buatPesanan();
 </script>
 </body>
-  </html>
+                                         </html>

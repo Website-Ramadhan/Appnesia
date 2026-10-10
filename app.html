@@ -8,7 +8,7 @@
 :root{--bg:#1a0808;--surface:#2a0f0f;--line:#4a1c1c;--text:#f5eaea;--muted:#b9a0a0;--accent:#ff5a4d;--amber:#f5a623;box-sizing:border-box}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{padding:calc(64px + env(safe-area-inset-top,0)) 16px calc(76px + env(safe-area-inset-bottom,0));max-width:640px;margin:0 auto}
+body{padding:calc(12px + env(safe-area-inset-top,0)) 16px calc(76px + env(safe-area-inset-bottom,0));max-width:640px;margin:0 auto};max-width:640px;margin:0 auto};max-width:640px;margin:0 auto}
 h1{font-size:26px;margin:20px 0 2px;letter-spacing:-.3px}
 .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
 .search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:16px}
@@ -53,31 +53,47 @@ html,body{transition:background-color .6s}
 .offline-bar{position:fixed;top:calc(64px + env(safe-area-inset-top,0));left:0;right:0;background:var(--amber);color:#1a0808;text-align:center;padding:6px;font-size:13px;font-weight:700;display:none;z-index:15}
 .offline-bar.on{display:block}
 
-/* === VERSI LEBIH BESAR === */
+/* === VERSI APLIKASI === */
 .app-version{
-  padding:14px 16px;
-  margin:0 0 16px;
-  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 14px;
+  margin:0 0 12px;
+  border-radius:12px;
   background:linear-gradient(135deg,#2a0f0f,#1a0808);
   border:1px solid var(--amber);
-  box-shadow:0 2px 12px rgba(245,166,35,.15);
+  box-shadow:0 2px 10px rgba(245,166,35,.15);
+}
+.app-version .v-kiri{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 .app-version .v-badge{
-  font-size:13px;
-  padding:5px 12px;
-  border-radius:8px;
+  background:linear-gradient(135deg,#4285f4,#34a853);
+  color:#fff;
+  font-weight:800;
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:6px;
+  letter-spacing:.3px;
 }
 .app-version .v-nama{
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
   color:var(--amber);
 }
 .app-version .v-kanan{
-  font-size:13px;
-  line-height:1.4;
+  font-size:12px;
+  color:var(--muted);
+  text-align:right;
+  line-height:1.3;
 }
 .app-version .v-kanan b{
-  font-size:14px;
+  font-size:13px;
+  color:var(--amber);
+  font-weight:700;
 }
 
 /* === VIDEO IKLAN SPONSOR (EMBED) === */
@@ -521,4 +537,4 @@ if('serviceWorker' in navigator){
 drawChips(); draw();
 </script>
 </body>
-</html>
+    </html> 

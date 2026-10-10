@@ -34,13 +34,62 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .box.on{display:block}
 .count{float:right;color:var(--muted);font-weight:400;font-size:12px}
 .foot{color:var(--muted);font-size:12px;margin-top:28px}
+
+/* === BADGE AKUN PLUS === */
+.badge-devplus{
+  background:linear-gradient(135deg,#4285f4,#34a853);
+  color:#fff;
+  font-size:10px;
+  font-weight:800;
+  padding:3px 8px;
+  border-radius:6px;
+  margin-left:8px;
+  letter-spacing:.3px;
+  display:inline-block;
+  vertical-align:middle;
+}
+.info-devplus{
+  background:linear-gradient(135deg,#2a0f0f,#1a0808);
+  border:2px solid var(--amber);
+  border-radius:14px;
+  padding:16px;
+  margin-top:16px;
+  text-align:center;
+  box-shadow:0 2px 10px rgba(245,166,35,.15);
+}
+.info-devplus h3{
+  margin:0 0 8px;
+  color:var(--amber);
+  font-size:17px;
+}
+.info-devplus p{
+  color:#b9a0a0;
+  font-size:13px;
+  margin:0 0 12px;
+}
+.info-devplus ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+  text-align:left;
+  display:inline-block;
+}
+.info-devplus li{
+  color:var(--ok);
+  font-size:13px;
+  margin:4px 0;
+}
 </style>
 </head>
 <body>
 <header><div class="in bar">
-<a class="brand" href="./"><img src="data:image/png;base64,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" alt="" width="34" height="34"><span>AppNesia</span></a>
+<a class="brand" href="./" id="brandHeader">
+  <img src="data:image/png;base64,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" alt="" width="34" height="34">
+  <span>AppNesia</span>
+</a>
 <span style="color:var(--muted);font-size:14px">Untuk Developer</span>
 </div></header>
+
 <main><div class="in">
 <h1>Kirim aplikasimu ke AppNesia</h1>
 <p>AppNesia adalah katalog aplikasi di Indonesia. Developer bisa mengirim aplikasinya agar masuk ke daftar, termasuk aplikasi yang tidak ada di Play Store.</p>
@@ -115,6 +164,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 <a class="btn" id="kirim" target="_blank" rel="noopener" href="#">Buka di GitHub</a>
 </div>
 
+<div id="infoDevPlusBox"></div>
+
 <p class="foot">AppNesia tidak berafiliasi dengan Google, Play Store, atau developer lain yang namanya muncul di katalog. Nama dan merek aplikasi milik pemiliknya masing-masing.</p>
 </div></main>
 
@@ -169,6 +220,48 @@ $("f").addEventListener("submit",function(e){
   $("hasil").classList.add("on");
   $("hasil").scrollIntoView({behavior:"smooth",block:"center"});
 });
+
+// ============================================================
+// FITUR AKUN DEVELOPER PLUS
+// ============================================================
+function cekAkunPlus(){
+  var punyaDevPlus = localStorage.getItem("an_developer_plus") === "aktif";
+  if(!punyaDevPlus) return;
+
+  // 1. Tambah badge "AKUN PLUS" di header
+  var brand = document.getElementById("brandHeader");
+  if(brand && !document.getElementById("badgeDevPlus")){
+    var badge = document.createElement("span");
+    badge.id = "badgeDevPlus";
+    badge.className = "badge-devplus";
+    badge.textContent = "⭐ AKUN PLUS";
+    brand.appendChild(badge);
+  }
+
+  // 2. Tambah kotak info di halaman
+  var box = document.getElementById("infoDevPlusBox");
+  if(box && !document.getElementById("infoDevPlus")){
+    var info = document.createElement("div");
+    info.id = "infoDevPlus";
+    info.className = "info-devplus";
+    info.innerHTML = 
+      '<h3>⭐ Akun Developer Plus</h3>' +
+      '<p>Kamu dapat akses prioritas & fitur eksklusif di AppNesia.</p>' +
+      '<ul>' +
+        '<li>✓ Kirim aplikasi sampai <b>10 aplikasi</b> (biasa cuma 3)</li>' +
+        '<li>✓ Review aplikasi <b>prioritas</b></li>' +
+        '<li>✓ Badge "Akun Plus" di profil developer</li>' +
+        '<li>✓ Dukungan admin langsung via WhatsApp</li>' +
+      '</ul>';
+    box.appendChild(info);
+  }
+}
+
+// Jalankan saat halaman dibuka
+cekAkunPlus();
+
+// Cek tiap 2 detik — kalau baru beli, langsung muncul
+setInterval(cekAkunPlus, 2000);
 </script>
 </body>
-                         </html>
+    </html>

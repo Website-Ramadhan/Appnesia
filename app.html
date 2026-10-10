@@ -61,6 +61,11 @@ html,body{transition:background-color .6s}
 .app-version .v-kanan{font-size:12px;color:var(--muted);text-align:right;line-height:1.3}
 .app-version .v-kanan b{font-size:13px;color:var(--amber);font-weight:700}
 
+/* === BANNER PRIORITAS (STABIL) === */
+.priority-bar{display:none;background:linear-gradient(135deg,#1e3a26,#2a4a36);border:1px solid #7bd88f;border-radius:12px;padding:10px 14px;margin:10px 0;font-size:13px;color:#dcc9c9;text-align:center;box-shadow:0 2px 8px rgba(123,216,143,.15)}
+.priority-bar.on{display:block}
+.priority-bar b{color:#7bd88f}
+
 /* === VIDEO IKLAN SPONSOR === */
 .ads-video{background:linear-gradient(135deg,#1a0808,#2a0f0f);border:1px solid var(--amber);border-radius:12px;margin:12px 0;overflow:hidden;position:relative}
 .ads-video .video-thumb{position:relative;height:180px;background:linear-gradient(135deg,#ff6b35,#f7c948);display:grid;place-items:center;cursor:pointer;overflow:hidden}
@@ -100,6 +105,9 @@ html,body{transition:background-color .6s}
 .warna-picker{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0));right:16px;z-index:50;background:var(--surface);border:2px solid var(--amber);border-radius:50%;width:56px;height:56px;display:none;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(245,166,35,.35);transition:transform .2s}
 .warna-picker.on{display:flex}
 .warna-picker:active{transform:scale(.9)}
+
+/* === BADGE STABIL DI KARTU APLIKASI === */
+.badge-stabil{display:inline-block;background:linear-gradient(135deg,#4285f4,#34a853);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;margin-left:6px;letter-spacing:.3px}
 </style>
 </head>
 <body>
@@ -125,6 +133,11 @@ html,body{transition:background-color .6s}
     Rilis: <b>10 Okt 2026</b><br>
     AppNesia toko aplikasi
   </div>
+</div>
+
+<!-- === BANNER PRIORITAS (untuk pembeli "Fitur Stabil") === -->
+<div class="priority-bar" id="priorityBar">
+  ⚡ <b>Dukungan Prioritas Aktif</b> — Bantuan kamu diprioritaskan!
 </div>
 
 <h1>AppNesia</h1>
@@ -177,8 +190,8 @@ html,body{transition:background-color .6s}
 
 <script>
 /* ============================================================
-   CEK PRODUK YANG SUDAH DIBELI — AKTIFKAN FITUR
-   ============================================================ */
+  CEK PRODUK YANG SUDAH DIBELI — AKTIFKAN FITUR
+  ============================================================ */
 var PRODUK_DIBELI = [];
 try {
   PRODUK_DIBELI = JSON.parse(localStorage.getItem("an_produk_dibeli") || "[]");
@@ -189,27 +202,34 @@ function punyaProduk(id){
 }
 
 function cekFiturTerbuka(){
+  // Baca ulang produk dibeli
+  try {
+    PRODUK_DIBELI = JSON.parse(localStorage.getItem("an_produk_dibeli") || "[]");
+  } catch(e){}
+
+  // 1. Premium: favorit instan + offline
   if(punyaProduk("premium") || punyaProduk("premium-plus")){
     localStorage.setItem("an_premium", "aktif");
-    console.log("✅ Premium aktif");
   }
+  // 2. Stabil: SEMUA fitur premium + prioritas
   if(punyaProduk("fitur stabil")){
     localStorage.setItem("an_fitur_stabil", "aktif");
-    console.log("✅ Fitur stabil aktif");
+    localStorage.setItem("an_premium", "aktif");
+    localStorage.setItem("an_ubah_warna", "aktif");
   }
+  // 3. Ubah warna
   if(punyaProduk("ubah halaman jadi warna sesuka")){
     localStorage.setItem("an_ubah_warna", "aktif");
-    console.log("✅ Ubah warna aktif");
   }
+  // 4. Developer plus
   if(punyaProduk("akun developer plus")){
     localStorage.setItem("an_developer_plus", "aktif");
-    console.log("✅ Akun developer plus aktif");
   }
 }
 cekFiturTerbuka();
 
 /* ============================================================
-   FITUR UBAH WARNA HALAMAN (untuk yang beli)
+   FITUR UBAH WARNA HALAMAN
    ============================================================ */
 var WARNA_LIST = [
   { nama:"Merah", bg:"#1a0808", surface:"#2a0f0f", line:"#4a1c1c", accent:"#ff5a4d", amber:"#f5a623" },
@@ -248,6 +268,44 @@ function cekTombolWarna(){
   }
 }
 cekTombolWarna();
+
+/* ============================================================
+   FITUR STABIL (PRIORITAS)
+   ============================================================ */
+function cekTombolStabil(){
+  var punyaStabil = localStorage.getItem("an_fitur_stabil") === "aktif";
+  var el = document.getElementById("priorityBar");
+  if(el) el.className = "priority-bar" + (punyaStabil ? " on" : "");
+}
+cekTombolStabil();
+
+/* ============================================================
+   AUTO-DETEKSI PEMBELIAN BARU
+   ============================================================ */
+var PRODUK_LAMA = [];
+try { PRODUK_LAMA = JSON.parse(localStorage.getItem("an_produk_dibeli") || "[]"); } catch(e){}
+
+function cekPembelianBaru(){
+  try {
+    var produkSekarang = JSON.parse(localStorage.getItem("an_produk_dibeli") || "[]");
+    if(produkSekarang.length > PRODUK_LAMA.length){
+      PRODUK_LAMA = produkSekarang;
+      PRODUK_DIBELI = produkSekarang;
+      cekFiturTerbuka();
+      if(typeof cekTombolWarna === "function") cekTombolWarna();
+      if(typeof cekTombolStabil === "function") cekTombolStabil();
+      var produkBaru = produkSekarang[produkSekarang.length - 1];
+      var namaProduk = {
+        "premium": "AppNesia Premium",
+        "fitur stabil": "Tombol Fitur Stabil",
+        "ubah halaman jadi warna sesuka": "Ubah Warna Halaman",
+        "akun developer plus": "Akun Developer Plus"
+      }[produkBaru] || produkBaru;
+      toast("🎉 " + namaProduk + " sudah aktif!");
+    }
+  } catch(e){}
+}
+setInterval(cekPembelianBaru, 3000);
 
 var KAT = [["semua","Semua"],["belanja","Belanja"],["keuangan","Keuangan"],["perjalanan","Perjalanan"],["sosial","Sosial"],["hiburan","Hiburan"],["produktif","Produktivitas"],["game","Game"]];
 var ICON = {belanja:"🛍️",keuangan:"💳",perjalanan:"🧭",sosial:"💬",hiburan:"🎬",produktif:"🗂️",game:"🎮"};

@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+    import { createClient } from '@supabase/supabase-js';
 
-export default {
-  async fetch(request, env) {
+    export default {
+    async fetch(request, env) {
     // ============================================================
     // 1. KONFIGURASI CORS (Agar bisa diakses dari admin.html)
     // ============================================================

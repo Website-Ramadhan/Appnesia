@@ -13,7 +13,13 @@ h1{font-size:28px;margin:0 0 8px;color:var(--accent);text-align:center;letter-sp
 .sub{color:var(--muted);font-size:14px;text-align:center;margin:0 0 24px;line-height:1.5}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;width:100%}
 .info{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.info .ikon{font-size:36px;width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#4285f4,#34a853);display:grid;place-items:center;flex:none}
+.info .ikon{
+  width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,#ff9a76,#ffb84d);
+  display:grid;place-items:center;flex:none;
+  overflow:hidden;
+}
+.info .ikon img{width:100%;height:100%;object-fit:cover}
 .info .nama{font-weight:700;font-size:18px;margin:0 0 4px}
 .info .versi{color:var(--muted);font-size:13px;margin:0}
 .fitur{list-style:none;padding:0;margin:0 0 20px}
@@ -35,10 +41,12 @@ h1{font-size:28px;margin:0 0 8px;color:var(--accent);text-align:center;letter-sp
 
 <div class="card">
   <div class="info">
-    <div class="ikon">👨‍💻</div>
+    <div class="ikon">
+      <img src="icon-dev.png" alt="AppNesia Developer">
+    </div>
     <div>
       <p class="nama">AppNesia Developer</p>
-      <p class="versi">Versi 1.0.0 · 8 MB</p>
+      <p class="versi">Versi 1.0.0 · 3.34 MB</p>
     </div>
   </div>
 
@@ -59,7 +67,7 @@ h1{font-size:28px;margin:0 0 8px;color:var(--accent);text-align:center;letter-sp
     <b>⚠️ Catatan:</b><br>
     • Hanya untuk developer<br>
     • Butuh akun developer (daftar di halaman login)<br>
-    • Ukuran file ±8 MB<br>
+    • Ukuran file ±3.34 MB<br>
     • Kompatibel dengan Android 7.0+
   </div>
 </div>
@@ -70,4 +78,4 @@ h1{font-size:28px;margin:0 0 8px;color:var(--accent);text-align:center;letter-sp
 </p>
 
 </body>
-    </html>
+</html> 

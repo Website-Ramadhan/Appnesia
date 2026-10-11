@@ -1,7 +1,7 @@
-    import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-    export default {
-    async fetch(request, env) {
+export default {
+  async fetch(request, env) {
     // ============================================================
     // 1. KONFIGURASI CORS (Agar bisa diakses dari admin.html)
     // ============================================================
@@ -17,10 +17,10 @@
     }
 
     // ============================================================
-    // 2. INISIALISASI SUPABASE
+    // 2. INISIALISASI SUPABASE (Ambil dari Environment Variables)
     // ============================================================
-    const supabaseUrl = env.SUPABASE_URL;https://ddnqfpeszktuvsypseyc.supabase.vo
-    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;SUPABASE_URL
+    const supabaseUrl = env.SUPABASE_URL;
+    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return new Response(

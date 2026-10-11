@@ -27,11 +27,12 @@ jobs:
         run: node acak.mjs
 
       - name: Buat proyek Android Developer
-        run: |
-          cd developer-app
-          npm install
-          npx cap add android
-          npx cap sync android
+     run: |
+      cp -r www-dev developer-app/
+      cd developer-app
+      npm install
+      npx cap add android
+      npx cap sync android
 
       - name: Atur nomor versi
         run: |

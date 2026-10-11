@@ -131,6 +131,10 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 </div></main>
 
 <script>
+if(!window.Capacitor || !window.Capacitor.isNativePlatform()){
+  alert('Halaman ini hanya bisa diakses dari aplikasi AppNesia.');
+  location.href = 'index.html';
+}  
 // ============================================================
 // KODE ASLI developer.html
 // ============================================================

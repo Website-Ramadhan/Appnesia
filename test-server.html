@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Server AppNesia</title>
+<style>
+body{font-family:system-ui;background:#1a0808;color:#f5eaea;padding:20px;max-width:600px;margin:0 auto}
+h1{color:#ff5a4d}
+.card{background:#2a0f0f;border:1px solid #4a1c1c;border-radius:12px;padding:16px;margin:12px 0}
+button{background:#ff5a4d;color:#1a0808;border:0;padding:10px 20px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;margin:4px 4px 4px 0}
+button.alt{background:transparent;border:1px solid #4a1c1c;color:#f5eaea}
+pre{background:#1a0808;padding:10px;border-radius:8px;overflow-x:auto;font-size:12px;color:#7bd88f}
+input{width:100%;padding:10px;border-radius:8px;border:1px solid #4a1c1c;background:#1a0808;color:#f5eaea;font:inherit;margin:4px 0}
+</style>
+</head>
+<body>
+<h1>🧪 Test Server AppNesia</h1>
+<p>URL Server:</p>
+<input id="urlServer" value="https://d8f81bcc-2d25-4e3e-8641-aeeb2d6c7690-00-1t727mu7vp9yi.pike.replit.dev">
+
+<div class="card">
+<h3>1. GET — Lihat Semua Pesanan</h3>
+<button onclick="getPesanan()">GET /api/pesanan</button>
+<pre id="hasilGet">Belum ada hasil</pre>
+</div>
+
+<div class="card">
+<h3>2. POST — Kirim Pesanan Baru</h3>
+<input id="orderId" placeholder="Order ID" value="TEST-001">
+<input id="produk" placeholder="Produk" value="premium">
+<input id="harga" placeholder="Harga" value="19000" type="number">
+<button onclick="postPesanan()">POST /api/pesanan</button>
+<pre id="hasilPost">Belum ada hasil</pre>
+</div>
+
+<div class="card">
+<h3>3. PUT — Ubah Status</h3>
+<input id="orderIdPut" placeholder="Order ID" value="TEST-001">
+<input id="statusPut" placeholder="Status (lunas/gagal)" value="lunas">
+<button onclick="putStatus()">PUT /api/pesanan/:id</button>
+<pre id="hasilPut">Belum ada hasil</pre>
+</div>
+
+<script>
+function baseUrl(){ return document.getElementById('urlServer').value.replace(/\/$/,''); }
+
+async function getPesanan(){
+  try {
+    const r = await fetch(baseUrl() + '/api/pesanan');
+    const d = await r.json();
+    document.getElementById('hasilGet').textContent = JSON.stringify(d, null, 2);
+  } catch(e) { document.getElementById('hasilGet').textContent = '❌ Error: ' + e.message; }
+}
+
+async function postPesanan(){
+  try {
+    const body = {
+      order_id: document.getElementById('orderId').value,
+      produk: document.getElementById('produk').value,
+      produk_nama: document.getElementById('produk').value,
+      harga: parseInt(document.getElementById('harga').value),
+      status: 'pending'
+    };
+    const r = await fetch(baseUrl() + '/api/pesanan', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    document.getElementById('hasilPost').textContent = JSON.stringify(d, null, 2);
+  } catch(e) { document.getElementById('hasilPost').textContent = '❌ Error: ' + e.message; }
+}
+
+async function putStatus(){
+  try {
+    const id = document.getElementById('orderIdPut').value;
+    const body = { status: document.getElementById('statusPut').value };
+    const r = await fetch(baseUrl() + '/api/pesanan/' + id, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    document.getElementById('hasilPut').textContent = JSON.stringify(d, null, 2);
+  } catch(e) { document.getElementById('hasilPut').textContent = '❌ Error: ' + e.message; }
+}
+</script>
+</body>
+  </html>

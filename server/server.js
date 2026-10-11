@@ -19,8 +19,8 @@
     // ============================================================
     // 2. INISIALISASI SUPABASE
     // ============================================================
-    const supabaseUrl = env.SUPABASE_URL;
-    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = env.SUPABASE_URL;https://ddnqfpeszktuvsypseyc.supabase.vo
+    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;SUPABASE_URL
 
     if (!supabaseUrl || !supabaseKey) {
       return new Response(

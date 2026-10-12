@@ -19,29 +19,34 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
-
     // ============================================================
-    // 2. 🔐 CEK TOKEN ADMIN (kecuali health check "/")
-    // ============================================================
-    if (path !== '/') {
-      const tokenDariClient = request.headers.get('X-Admin-Token');
-      const TOKEN_RAHASIA = env.ADMIN_TOKEN;
+// 2. 🔐 CEK TOKEN ADMIN
+//    - POST /api/pesanan (bikin pesanan baru) → PUBLIK
+//    - Endpoint lain → BUTUH TOKEN
+// ============================================================
+if (path !== '/') {
+  // Kecualikan POST /api/pesanan — pembeli gak punya token
+  const isPublicEndpoint = (path === '/api/pesanan' && method === 'POST');
 
-      if (!TOKEN_RAHASIA) {
-        return new Response(
-          JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+  if (!isPublicEndpoint) {
+    const tokenDariClient = request.headers.get('X-Admin-Token');
+    const TOKEN_RAHASIA = env.ADMIN_TOKEN;
 
-      if (tokenDariClient !== TOKEN_RAHASIA) {
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+    if (!TOKEN_RAHASIA) {
+      return new Response(
+        JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
+    if (tokenDariClient !== TOKEN_RAHASIA) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  } 
+}
     // ============================================================
     // 3. INISIALISASI SUPABASE
     // ============================================================

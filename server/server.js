@@ -8,7 +8,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
     };
 
     // Tangani preflight request (OPTIONS)
@@ -36,9 +36,31 @@ export default {
     const method = request.method;
 
     try {
-      // ============================================================
-      // ENDPOINT 1: GET — Lihat semua pesanan
-      // ============================================================
+  // ============================================================
+  // 🔐 CEK TOKEN ADMIN
+  // ============================================================
+  if (path !== '/') {
+    const tokenClient = request.headers.get('X-Admin-Token');
+    const TOKEN_RAHASIA = env.ADMIN_TOKEN;
+
+    if (!TOKEN_RAHASIA) {
+      return new Response(
+        JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (tokenClient !== TOKEN_RAHASIA) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+    
+   // ============================================================
+   // ENDPOINT 1: GET — Lihat semua pesanan
+   // ============================================================
       if (path === '/api/pesanan' && method === 'GET') {
         const { data, error } = await supabase
           .from('pesanan')

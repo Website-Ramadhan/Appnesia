@@ -7,7 +7,7 @@ export default {
     // ============================================================
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
 
@@ -150,7 +150,31 @@ export default {
       }
 
       // ============================================================
-      // ENDPOINT 5: GET — Health check
+      // ENDPOINT 5: DELETE — Hapus pesanan  ← FITUR BARU
+      // ============================================================
+      if (path.startsWith('/api/pesanan/') && method === 'DELETE') {
+        const orderId = decodeURIComponent(path.split('/').pop());
+
+        const { data, error } = await supabase
+          .from('pesanan')
+          .delete()
+          .eq('order_id', orderId)
+          .select();
+
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          return new Response(JSON.stringify({ error: 'Pesanan tidak ditemukan' }), {
+            status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        return new Response(JSON.stringify({ success: true, order_id: orderId }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // ============================================================
+      // ENDPOINT 6: GET — Health check
       // ============================================================
       if (path === '/' && method === 'GET') {
         return new Response(JSON.stringify({

@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+ import { createClient } from '@supabase/supabase-js';
 
 export default {
   async fetch(request, env) {
     // ============================================================
-    // 1. KONFIGURASI CORS (Agar bisa diakses dari admin.html)
+    // 1. KONFIGURASI CORS
     // ============================================================
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
@@ -11,13 +11,39 @@ export default {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
     };
 
-    // Tangani preflight request (OPTIONS)
+    // Preflight request
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
     }
 
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const method = request.method;
+
     // ============================================================
-    // 2. INISIALISASI SUPABASE (Ambil dari Environment Variables)
+    // 2. 🔐 CEK TOKEN ADMIN (kecuali health check "/")
+    // ============================================================
+    if (path !== '/') {
+      const tokenDariClient = request.headers.get('X-Admin-Token');
+      const TOKEN_RAHASIA = env.ADMIN_TOKEN;
+
+      if (!TOKEN_RAHASIA) {
+        return new Response(
+          JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (tokenDariClient !== TOKEN_RAHASIA) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // ============================================================
+    // 3. INISIALISASI SUPABASE
     // ============================================================
     const supabaseUrl = env.SUPABASE_URL;
     const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
@@ -31,36 +57,10 @@ export default {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const method = request.method;
-
     try {
-  // ============================================================
-  // 🔐 CEK TOKEN ADMIN
-  // ============================================================
-  if (path !== '/') {
-    const tokenClient = request.headers.get('X-Admin-Token');
-    const TOKEN_RAHASIA = env.ADMIN_TOKEN;
-
-    if (!TOKEN_RAHASIA) {
-      return new Response(
-        JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (tokenClient !== TOKEN_RAHASIA) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-  }
-    
-   // ============================================================
-   // ENDPOINT 1: GET — Lihat semua pesanan
-   // ============================================================
+      // ============================================================
+      // ENDPOINT 1: GET — Lihat semua pesanan
+      // ============================================================
       if (path === '/api/pesanan' && method === 'GET') {
         const { data, error } = await supabase
           .from('pesanan')
@@ -136,7 +136,7 @@ export default {
       }
 
       // ============================================================
-      // ENDPOINT 4: PUT — Ubah status pesanan (UNTUK LUNAS)
+      // ENDPOINT 4: PUT — Ubah status pesanan
       // ============================================================
       if (path.startsWith('/api/pesanan/') && method === 'PUT') {
         const orderId = path.split('/').pop();
@@ -172,7 +172,7 @@ export default {
       }
 
       // ============================================================
-      // ENDPOINT 5: DELETE — Hapus pesanan  ← FITUR BARU
+      // ENDPOINT 5: DELETE — Hapus pesanan
       // ============================================================
       if (path.startsWith('/api/pesanan/') && method === 'DELETE') {
         const orderId = decodeURIComponent(path.split('/').pop());
@@ -196,7 +196,7 @@ export default {
       }
 
       // ============================================================
-      // ENDPOINT 6: GET — Health check
+      // ENDPOINT 6: GET — Health check (publik, tanpa token)
       // ============================================================
       if (path === '/' && method === 'GET') {
         return new Response(JSON.stringify({
@@ -208,7 +208,7 @@ export default {
         });
       }
 
-      // Jika rute tidak ditemukan
+      // Rute tidak ditemukan
       return new Response(JSON.stringify({ error: 'Not Found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });

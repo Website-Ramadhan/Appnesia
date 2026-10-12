@@ -48,7 +48,6 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;display:none;z-index:100;max-width:90%;text-align:center}
 .toast.on{display:block}
-.toast.err{background:#ff5a4d;color:#fff}
 </style>
 </head>
 <body>
@@ -122,10 +121,10 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ============================================================
-// KONFIGURASI
+// KONFIGURASI SUPABASE
 // ============================================================
-const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
+const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co"
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
 const NOMOR_GOPAY  = '0895403096967';
 const NOMOR_DANA   = '0895403096967';
 // ============================================================
@@ -138,7 +137,6 @@ let orderId = null;
 let pollingAktif = false;
 let statusTerakhir = null;
 
-// Ambil produk dari localStorage
 try {
   const p = JSON.parse(localStorage.getItem('an_produk') || 'null');
   if(p && p.nama) produk = p;
@@ -183,11 +181,7 @@ function pantauStatus(){
   if(pollingAktif) return;
   pollingAktif = true;
   console.log('Mulai polling untuk:', orderId);
-
-  // Cek awal
   cekStatus();
-
-  // Polling tiap 3 detik
   setInterval(cekStatus, 3000);
 }
 
@@ -199,10 +193,7 @@ async function cekStatus(){
     .eq('order_id', orderId)
     .single();
 
-  if(error){
-    console.warn('Gagal cek status:', error.message);
-    return;
-  }
+  if(error){ console.warn('Gagal cek status:', error.message); return; }
   if(!data) return;
 
   const status = String(data.status || '').toLowerCase();
@@ -214,21 +205,39 @@ async function cekStatus(){
 }
 
 // ============================================================
-// HANDLE STATUS
+// HANDLE STATUS — INI YANG PENTING
 // ============================================================
 function handleStatus(status){
   if(status === 'lunas'){
     $('boxBayar').style.display = 'none';
     $('boxWait').style.display = 'none';
+    $('boxErr').style.display = 'none';
     $('boxOk').style.display = 'block';
-    // Simpan produk yang sudah dibeli
+    
+    // === SIMPAN PRODUK KE localStorage ===
     try {
       var arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
       if(arr.indexOf(produk.id) === -1) arr.push(produk.id);
       localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
-      localStorage.setItem('an_produk_terakhir', produk.id);
-      console.log('Produk tersimpan:', arr);
-    } catch(e){}
+      console.log('✅ Produk tersimpan:', arr);
+    } catch(e){
+      console.error('❌ Gagal simpan produk:', e);
+    }
+    
+    // Simpan status masing-masing fitur
+    if(produk.id === 'premium' || produk.id === 'premium-plus' || produk.id === 'fitur stabil'){
+      localStorage.setItem('an_premium', 'aktif');
+    }
+    if(produk.id === 'ubah halaman jadi warna sesuka' || produk.id === 'fitur stabil'){
+      localStorage.setItem('an_ubah_warna', 'aktif');
+    }
+    if(produk.id === 'fitur stabil'){
+      localStorage.setItem('an_fitur_stabil', 'aktif');
+    }
+    if(produk.id === 'akun developer plus'){
+      localStorage.setItem('an_developer_plus', 'aktif');
+    }
+    
     window.scrollTo(0, 0);
   } else if(status === 'gagal'){
     $('boxBayar').style.display = 'none';
@@ -291,11 +300,7 @@ $('sudahBayarBtn').addEventListener('click', async () => {
   const { error } = await sb.from('pesanan')
     .update({ status: 'menunggu', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
-  if(error){
-    console.error('ERROR UPDATE:', error);
-    toast('Gagal: ' + (error.message || error.code), true);
-    return;
-  }
+  if(error){ console.error('ERROR UPDATE:', error); toast('Gagal: ' + (error.message || error.code), true); return; }
   handleStatus('menunggu');
 });
 
@@ -305,11 +310,7 @@ $('batalBtn').addEventListener('click', async () => {
   const { error } = await sb.from('pesanan')
     .update({ status: 'gagal', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
-  if(error){
-    console.error('ERROR UPDATE:', error);
-    toast('Gagal: ' + (error.message || error.code), true);
-    return;
-  }
+  if(error){ console.error('ERROR UPDATE:', error); toast('Gagal: ' + (error.message || error.code), true); return; }
   handleStatus('gagal');
 });
 
@@ -329,4 +330,4 @@ updateTampilan();
 buatPesanan();
 </script>
 </body>
-                                         </html>
+</html>

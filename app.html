@@ -248,12 +248,112 @@ html,body{transition:background-color .6s}
 <div class="toast-fav" id="toastFav"></div>
 <div class="warna-picker" id="warnaPicker" onclick="gantiWarna()">🎨</div>
 
+<!-- ============================================================ -->
+<!-- AUTO-CEK STATUS PESANAN TERTUNDA -->
+<!-- Cek apakah admin sudah konfirmasi pesanan yang pending -->
+<!-- ============================================================ -->
+<script>
+(async function cekStatusPesanan() {
+  try {
+    const pending = JSON.parse(localStorage.getItem('an_pending_order') || 'null');
+    if (!pending || !pending.order_id) {
+      console.log('ℹ️ Tidak ada pesanan tertunda');
+      return;
+    }
+
+    if (Date.now() - pending.created_at > 7 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem('an_pending_order');
+      return;
+    }
+
+    console.log('🔍 Cek status pesanan:', pending.order_id);
+
+    const SB_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
+
+    const res = await fetch(
+      `${SB_URL}/rest/v1/pesanan?order_id=eq.${encodeURIComponent(pending.order_id)}&select=*`,
+      {
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`
+        }
+      }
+    );
+
+    const data = await res.json();
+    if (!data || !data.length) return;
+
+    const pesanan = data[0];
+    const status = String(pesanan.status || '').toLowerCase();
+    const produkId = pesanan.produk;
+    const fiturList = (pending.produk && pending.produk.fitur) || [];
+
+    console.log('📦 Status:', status, '| Produk:', produkId, '| Fitur:', fiturList);
+
+    if (status === 'lunas') {
+      console.log('✅ LUNAS! Aktifkan produk:', produkId);
+
+      let arr = [];
+      try { arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]'); } catch(e){}
+      if (!arr.includes(produkId)) arr.push(produkId);
+      localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
+      localStorage.setItem('an_produk_terakhir', produkId);
+
+      const detailProduk = {
+        id: produkId,
+        nama: pesanan.produk_nama,
+        fitur: fiturList,
+        aktif_sejak: new Date().toISOString()
+      };
+      localStorage.setItem('an_produk_aktif', JSON.stringify(detailProduk));
+      localStorage.setItem('an_produk_aktif_' + produkId, JSON.stringify(detailProduk));
+
+      if (fiturList.includes('favorit-instan') || produkId === 'premium') {
+        localStorage.setItem('an_premium', 'aktif');
+        localStorage.setItem('an_favorit_instan', 'aktif');
+      }
+      if (fiturList.includes('akses-offline')) {
+        localStorage.setItem('an_akses_offline', 'aktif');
+      }
+      if (fiturList.includes('fitur-stabil') || produkId === 'fitur stabil') {
+        localStorage.setItem('an_fitur_stabil', 'aktif');
+        localStorage.setItem('an_premium', 'aktif');
+      }
+      if (fiturList.includes('ubah-warna') || produkId === 'ubah halaman jadi warna sesuka') {
+        localStorage.setItem('an_ubah_warna', 'aktif');
+      }
+      if (fiturList.includes('developer-plus') || produkId === 'akun developer plus') {
+        localStorage.setItem('an_developer_plus', 'aktif');
+      }
+
+      localStorage.removeItem('an_pending_order');
+
+      setTimeout(() => {
+        alert('🎉 Pembayaran dikonfirmasi admin!\n\nFitur ' + (pesanan.produk_nama || produkId) + ' sudah aktif.');
+        location.reload();
+      }, 800);
+
+    } else if (status === 'gagal') {
+      console.log('❌ Pesanan gagal, hapus pending');
+      localStorage.removeItem('an_pending_order');
+    } else {
+      console.log('⏳ Pesanan masih', status);
+    }
+  } catch(e) {
+    console.warn('Auto-cek gagal:', e);
+  }
+})();
+</script>
+
+<!-- ============================================================ -->
+<!-- SCRIPT UTAMA APPNESIA -->
+<!-- ============================================================ -->
 <script>
 /* ============================================================
    DETEKSI ROOT — BLOKIR APLIKASI KALAU HP DI-ROOT
    ============================================================ */
 (function cekRoot(){
-  // Cek lewat Capacitor (kalau plugin terpasang)
   if(window.Capacitor && window.Capacitor.Plugins){
     var Device = window.Capacitor.Plugins.DeviceSecurityDetect;
     if(Device && typeof Device.isJailBreakOrRooted === "function"){
@@ -262,7 +362,6 @@ html,body{transition:background-color .6s}
       }).catch(function(){});
     }
   }
-  // Cek file root umum (kalau di APK, protocol file://)
   var fileRoot = [
     "/system/app/Superuser.apk","/sbin/su","/system/bin/su","/system/xbin/su",
     "/data/local/xbin/su","/data/local/bin/su","/system/sd/xbin/su",
@@ -444,6 +543,7 @@ function save(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e)
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 function toast(t){ var el=document.getElementById("toast"); el.textContent=t; el.style.display="block"; clearTimeout(toast.t); toast.t=setTimeout(function(){el.style.display="none";},1800); }
 function toggle(arr,name){ var i=arr.indexOf(name); if(i>-1) arr.splice(i,1); else arr.push(name); } 
+
 /* === OVERLAY === */
 function tampilkanLoading(){
   var ov=document.getElementById("loadingOverlay"),sp=document.getElementById("loadingSpinner"),ik=document.getElementById("offlineIkon"),jd=document.getElementById("loadingJudul"),ps=document.getElementById("loadingPesan"),rt=document.getElementById("retryBtn");
@@ -645,4 +745,4 @@ if('serviceWorker' in navigator){
 if(!navigator.onLine){ tampilkanOffline(); } else { tampilkanLoading(); drawChips(); draw(); muatDataUlang(); }
 </script>
 </body>
-</html>  
+  </html>

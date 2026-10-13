@@ -76,8 +76,8 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
   <p>Admin sedang cek pembayaran kamu. Halaman ini otomatis update saat dikonfirmasi.</p>
   <p style="margin-top:10px;font-size:13px;color:var(--muted)">Order ID: <b id="waitOrderId">-</b></p>
   <a class="btn alt" href="index.html" style="margin-top:16px">🏠 Buka AppNesia</a>
-  <p style="margin-top:10px;font-size:12px;color:var(--muted)">
-    Kamu boleh tutup halaman ini. Saat admin konfirmasi, produk otomatis aktif di AppNesia.
+  <p style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.5">
+    💡 Kamu boleh tutup halaman ini. Saat admin konfirmasi, produk otomatis aktif di AppNesia.
   </p>
 </div>
 
@@ -125,14 +125,10 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// ============================================================
-// KONFIGURASI SUPABASE
-// ============================================================
 const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
-const NOMOR_GOPAY  = '0895403096967';
-const NOMOR_DANA   = '0895403096967';
-// ============================================================
+const NOMOR_GOPAY = '0895403096967';
+const NOMOR_DANA = '0895403096967';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
@@ -143,18 +139,16 @@ let pollingAktif = false;
 let pollingTimer = null;
 let statusTerakhir = null;
 
-// ============================================================
-// 🔑 PENDING ORDER — biar gak bikin pesanan baru
-// ============================================================
 const PENDING_KEY = 'an_pending_order';
 
-function simpanPending(orderId, produk) {
+function simpanPending(oid, p) {
   try {
     localStorage.setItem(PENDING_KEY, JSON.stringify({
-      order_id: orderId,
-      produk: produk,
+      order_id: oid,
+      produk: p,
       created_at: Date.now()
     }));
+    console.log('💾 Pending disimpan:', oid);
   } catch(e) {}
 }
 
@@ -162,7 +156,6 @@ function ambilPending() {
   try {
     const data = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
     if (!data || !data.order_id) return null;
-    // Kalau lebih dari 7 hari, hapus
     if (Date.now() - data.created_at > 7 * 24 * 60 * 60 * 1000) {
       localStorage.removeItem(PENDING_KEY);
       return null;
@@ -173,84 +166,62 @@ function ambilPending() {
 
 function hapusPending() {
   localStorage.removeItem(PENDING_KEY);
+  console.log('🗑️ Pending dihapus');
 }
 
-// ============================================================
-// 🎁 AKTIVASI PRODUK — simpan ke localStorage
-// ============================================================
 function aktifkanProduk(p) {
-  console.log('🎁 Mengaktifkan produk:', p);
-  
-  // Simpan daftar produk yang dibeli
+  console.log('🎁 Aktifkan produk:', p);
   try {
     const arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
     if (!arr.includes(p.id)) arr.push(p.id);
     localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
   } catch(e) {}
-  
-  // Simpan produk terakhir
   localStorage.setItem('an_produk_terakhir', p.id);
   
-  // Simpan detail produk lengkap (untuk referensi AppNesia)
-  localStorage.setItem('an_produk_aktif_' + p.id, JSON.stringify({
+  const detail = {
     id: p.id,
     nama: p.nama,
     fitur: p.fitur || [],
     aktif_sejak: new Date().toISOString()
-  }));
+  };
+  localStorage.setItem('an_produk_aktif_' + p.id, JSON.stringify(detail));
+  localStorage.setItem('an_produk_aktif', JSON.stringify(detail));
   
-  // Aktifkan flag masing-masing fitur
-  const fiturList = Array.isArray(p.fitur) ? p.fitur : [];
-  
-  if (fiturList.includes('favorit-instan') || p.id === 'premium' || p.id === 'premium-plus') {
+  const f = Array.isArray(p.fitur) ? p.fitur : [];
+  if (f.includes('favorit-instan') || p.id === 'premium') {
     localStorage.setItem('an_premium', 'aktif');
     localStorage.setItem('an_favorit_instan', 'aktif');
   }
-  if (fiturList.includes('akses-offline')) {
+  if (f.includes('akses-offline')) {
     localStorage.setItem('an_akses_offline', 'aktif');
   }
-  if (fiturList.includes('fitur-stabil') || p.id === 'fitur-stabil') {
+  if (f.includes('fitur-stabil') || p.id === 'fitur stabil') {
     localStorage.setItem('an_fitur_stabil', 'aktif');
     localStorage.setItem('an_premium', 'aktif');
   }
-  if (fiturList.includes('ubah-warna') || p.id === 'ubah-warna') {
+  if (f.includes('ubah-warna') || p.id === 'ubah halaman jadi warna sesuka') {
     localStorage.setItem('an_ubah_warna', 'aktif');
   }
-  if (fiturList.includes('developer-plus') || p.id === 'developer-plus') {
+  if (f.includes('developer-plus') || p.id === 'akun developer plus') {
     localStorage.setItem('an_developer_plus', 'aktif');
   }
-  
-  // Simpan juga sebagai "produk aktif terakhir" untuk AppNesia
-  localStorage.setItem('an_produk_aktif', JSON.stringify({
-    id: p.id,
-    nama: p.nama,
-    fitur: fiturList,
-    aktif_sejak: new Date().toISOString()
-  }));
-  
-  console.log('✅ Produk teraktifkan, fitur:', fiturList);
+  console.log('✅ Fitur aktif:', f);
 }
 
-// Ambil produk dari localStorage
 try {
   const p = JSON.parse(localStorage.getItem('an_produk') || 'null');
   if (p && p.nama) produk = p;
 } catch(e){}
-console.log('📦 Produk yang dibeli:', produk);
+console.log('📦 Produk:', produk);
 
 const rupiah = n => 'Rp' + Number(n).toLocaleString('id-ID');
 const genOrderId = () => 'APP-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
 
-// ============================================================
-// BUAT PESANAN / LANJUT PESANAN LAMA
-// ============================================================
 async function buatPesanan() {
-  // Cek dulu: ada order lama yang belum selesai?
   const pending = ambilPending();
   
   if (pending) {
     console.log('🔍 Ada order lama:', pending.order_id);
-    
     const { data, error } = await sb
       .from('pesanan')
       .select('*')
@@ -258,7 +229,6 @@ async function buatPesanan() {
       .maybeSingle();
     
     if (!error && data) {
-      // Update produk dari data
       if (data.produk_nama) {
         produk = {
           id: data.produk,
@@ -266,17 +236,15 @@ async function buatPesanan() {
           harga: data.harga,
           ikon: produk.ikon || '⭐',
           deskripsi: produk.deskripsi || '',
-          fitur: produk.fitur || []
+          fitur: (pending.produk && pending.produk.fitur) || []
         };
         renderProduk();
       }
-      
       orderId = pending.order_id;
       $('orderId').textContent = orderId;
       console.log('✅ Lanjut order lama:', orderId);
       
       const status = String(data.status || 'pending').toLowerCase();
-      
       if (status === 'lunas') {
         aktifkanProduk(produk);
         hapusPending();
@@ -288,7 +256,6 @@ async function buatPesanan() {
         hapusPending();
         handleStatus('gagal');
       } else {
-        // pending — pantau
         handleStatus('pending');
         pantauStatus();
       }
@@ -299,7 +266,6 @@ async function buatPesanan() {
     }
   }
   
-  // Bikin order baru
   orderId = genOrderId();
   console.log('🔄 Bikin pesanan baru:', orderId);
   $('orderId').textContent = 'Memuat...';
@@ -313,7 +279,7 @@ async function buatPesanan() {
   });
 
   if (error) {
-    console.error('❌ ERROR INSERT:', error);
+    console.error('❌ Insert gagal:', error);
     $('orderId').textContent = '-';
     toast('Gagal: ' + (error.message || error.code || 'unknown'), true);
     return;
@@ -321,21 +287,14 @@ async function buatPesanan() {
 
   console.log('✅ Pesanan dibuat:', orderId);
   $('orderId').textContent = orderId;
-  
-  // Simpan pending
   simpanPending(orderId, produk);
-  
   pantauStatus();
 }
 
-// ============================================================
-// PANTAU STATUS VIA POLLING
-// ============================================================
 function pantauStatus() {
   if (!orderId || pollingAktif) return;
   pollingAktif = true;
-  console.log('👀 Mulai polling:', orderId);
-  
+  console.log('👀 Polling:', orderId);
   cekStatus();
   pollingTimer = setInterval(cekStatus, 5000);
 }
@@ -353,7 +312,7 @@ async function cekStatus() {
     .eq('order_id', orderId)
     .maybeSingle();
 
-  if (error) { console.warn('⚠️ Gagal cek status:', error.message); return; }
+  if (error) { console.warn('⚠️ Cek gagal:', error.message); return; }
   if (!data) return;
 
   const status = String(data.status || '').toLowerCase();
@@ -364,9 +323,6 @@ async function cekStatus() {
   handleStatus(status);
 }
 
-// ============================================================
-// HANDLE STATUS
-// ============================================================
 function handleStatus(status) {
   const boxes = { ok: $('boxOk'), err: $('boxErr'), wait: $('boxWait'), bayar: $('boxBayar') };
 
@@ -375,14 +331,10 @@ function handleStatus(status) {
     boxes.wait.style.display = 'none';
     boxes.err.style.display = 'none';
     boxes.ok.style.display = 'block';
-
-    // Aktifkan produk
     aktifkanProduk(produk);
     hapusPending();
-    
     stopPolling();
     window.scrollTo(0, 0);
-
   } else if (status === 'gagal') {
     boxes.bayar.style.display = 'none';
     boxes.wait.style.display = 'none';
@@ -391,7 +343,6 @@ function handleStatus(status) {
     hapusPending();
     stopPolling();
     window.scrollTo(0, 0);
-
   } else if (status === 'menunggu') {
     boxes.bayar.style.display = 'none';
     boxes.ok.style.display = 'none';
@@ -399,7 +350,6 @@ function handleStatus(status) {
     boxes.wait.style.display = 'block';
     $('waitOrderId').textContent = orderId;
     window.scrollTo(0, 0);
-
   } else {
     boxes.ok.style.display = 'none';
     boxes.err.style.display = 'none';
@@ -408,9 +358,6 @@ function handleStatus(status) {
   }
 }
 
-// ============================================================
-// RENDER
-// ============================================================
 function renderProduk() {
   $('ikonProduk').textContent = produk.ikon || '⭐';
   $('namaProduk').textContent = produk.nama;
@@ -432,9 +379,6 @@ function updateTampilan() {
   );
 }
 
-// ============================================================
-// EVENT LISTENER
-// ============================================================
 $('pilihMetode').addEventListener('click', e => {
   const t = e.target.closest('button[data-metode]');
   if (!t) return;
@@ -453,18 +397,18 @@ $('salinBtn').addEventListener('click', () => {
 
 $('sudahBayarBtn').addEventListener('click', async () => {
   if (!orderId) { toast('Pesanan belum siap', true); return; }
-  console.log('📤 Update → menunggu:', orderId);
+  console.log('📤 → menunggu:', orderId);
   const { error } = await sb.from('pesanan')
     .update({ status: 'menunggu', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
-  if (error) { console.error(error); toast('Gagal: ' + (error.message || error.code), true); return; }
+  if (error) { toast('Gagal: ' + (error.message || error.code), true); return; }
   handleStatus('menunggu');
 });
 
 $('batalBtn').addEventListener('click', async () => {
   if (!orderId) { toast('Pesanan belum siap', true); return; }
   if (!confirm('Yakin batalkan pesanan ini?')) return;
-  console.log('📤 Update → gagal:', orderId);
+  console.log('📤 → gagal:', orderId);
   const { error } = await sb.from('pesanan')
     .update({ status: 'gagal', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
@@ -480,9 +424,6 @@ function toast(t, isErr) {
   toast.t = setTimeout(() => el.className = 'toast', 3000);
 }
 
-// ============================================================
-// START
-// ============================================================
 renderProduk();
 updateTampilan();
 buatPesanan();

@@ -113,15 +113,15 @@ document.addEventListener("click", function(e){
   if(!p) return;
   
   console.log("🛒 Beli produk:", p);
+  try {
+    localStorage.setItem("an_produk", JSON.stringify(p));
+    console.log("💾 Tersimpan:", p.nama, "| Fitur:", p.fitur);
+  } catch(err){ console.error("Gagal simpan:", err); }
   
-  // Simpan produk LENGKAP dengan fitur
-  try { localStorage.setItem("an_produk", JSON.stringify(p)); } catch(err){}
-  
-  // Redirect ke halaman pembayaran
-  location.href = "bayar.html";  // ← pastikan nama file ini benar
+  location.href = "pembayaran.html";
 });
 
 render();
 </script>
 </body>
-</html>
+  </html>

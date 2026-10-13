@@ -1,52 +1,53 @@
- import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 export default {
   async fetch(request, env) {
     // ============================================================
-    // 1. KONFIGURASI CORS
+    // 1. KONFIGURASI CORS — support semua method
     // ============================================================
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
+      'Access-Control-Max-Age': '86400',
     };
 
-    // Preflight request
+    // Handle preflight OPTIONS
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+
     // ============================================================
-// 2. 🔐 CEK TOKEN ADMIN
-//    - POST /api/pesanan (bikin pesanan baru) → PUBLIK
-//    - Endpoint lain → BUTUH TOKEN
-// ============================================================
-if (path !== '/') {
-  // Kecualikan POST /api/pesanan — pembeli gak punya token
-  const isPublicEndpoint = (path === '/api/pesanan' && method === 'POST');
+    // 2. 🔐 CEK TOKEN ADMIN
+    //    Kecuali: "/" dan "POST /api/pesanan" (pembeli bikin pesanan)
+    // ============================================================
+    if (path !== '/') {
+      const isPublicPost = (path === '/api/pesanan' && method === 'POST');
 
-  if (!isPublicEndpoint) {
-    const tokenDariClient = request.headers.get('X-Admin-Token');
-    const TOKEN_RAHASIA = env.ADMIN_TOKEN;
+      if (!isPublicPost) {
+        const tokenDariClient = request.headers.get('X-Admin-Token');
+        const TOKEN_RAHASIA = env.ADMIN_TOKEN;
 
-    if (!TOKEN_RAHASIA) {
-      return new Response(
-        JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+        if (!TOKEN_RAHASIA) {
+          return new Response(
+            JSON.stringify({ error: 'Server belum dikonfigurasi (ADMIN_TOKEN kosong)' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        if (tokenDariClient !== TOKEN_RAHASIA) {
+          return new Response(
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
     }
 
-    if (tokenDariClient !== TOKEN_RAHASIA) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-  } 
-}
     // ============================================================
     // 3. INISIALISASI SUPABASE
     // ============================================================
@@ -64,7 +65,20 @@ if (path !== '/') {
 
     try {
       // ============================================================
-      // ENDPOINT 1: GET — Lihat semua pesanan
+      // ENDPOINT 1: GET / — Health check (publik)
+      // ============================================================
+      if (path === '/' && method === 'GET') {
+        return new Response(JSON.stringify({
+          status: 'OK',
+          app: 'AppNesia Worker (Cloudflare)',
+          time: new Date().toISOString()
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // ============================================================
+      // ENDPOINT 2: GET /api/pesanan — Lihat semua pesanan (admin)
       // ============================================================
       if (path === '/api/pesanan' && method === 'GET') {
         const { data, error } = await supabase
@@ -79,31 +93,7 @@ if (path !== '/') {
       }
 
       // ============================================================
-      // ENDPOINT 2: GET — Lihat pesanan berdasarkan order_id
-      // ============================================================
-      if (path.startsWith('/api/pesanan/') && method === 'GET') {
-        const orderId = path.split('/').pop();
-        const { data, error } = await supabase
-          .from('pesanan')
-          .select('*')
-          .eq('order_id', orderId)
-          .single();
-
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return new Response(JSON.stringify({ error: 'Pesanan tidak ditemukan' }), {
-              status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-          }
-          throw error;
-        }
-        return new Response(JSON.stringify(data), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // ============================================================
-      // ENDPOINT 3: POST — Kirim pesanan baru
+      // ENDPOINT 3: POST /api/pesanan — Bikin pesanan baru (publik)
       // ============================================================
       if (path === '/api/pesanan' && method === 'POST') {
         const body = await request.json();
@@ -141,14 +131,45 @@ if (path !== '/') {
       }
 
       // ============================================================
-      // ENDPOINT 4: PUT — Ubah status pesanan
+      // ENDPOINT 4: GET /api/pesanan/:id — Lihat 1 pesanan (admin)
+      // ============================================================
+      if (path.startsWith('/api/pesanan/') && method === 'GET') {
+        const orderId = decodeURIComponent(path.split('/').pop());
+        const { data, error } = await supabase
+          .from('pesanan')
+          .select('*')
+          .eq('order_id', orderId)
+          .single();
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            return new Response(JSON.stringify({ error: 'Pesanan tidak ditemukan' }), {
+              status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+          throw error;
+        }
+        return new Response(JSON.stringify(data), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // ============================================================
+      // ENDPOINT 5: PUT /api/pesanan/:id — Ubah status (admin)
       // ============================================================
       if (path.startsWith('/api/pesanan/') && method === 'PUT') {
-        const orderId = path.split('/').pop();
-        const body = await request.json();
-        const { status } = body;
+        const orderId = decodeURIComponent(path.split('/').pop());
 
+        let body;
+        try { body = await request.json(); } catch (e) {
+          return new Response(JSON.stringify({ error: 'Body JSON tidak valid' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const { status } = body;
         const validStatus = ['pending', 'menunggu', 'lunas', 'gagal'];
+
         if (!status || !validStatus.includes(status)) {
           return new Response(JSON.stringify({ error: 'Status tidak valid' }), {
             status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -171,13 +192,13 @@ if (path !== '/') {
           });
         }
 
-        return new Response(JSON.stringify(data[0]), {
+        return new Response(JSON.stringify({ success: true, data: data[0] }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
       // ============================================================
-      // ENDPOINT 5: DELETE — Hapus pesanan
+      // ENDPOINT 6: DELETE /api/pesanan/:id — Hapus pesanan (admin)
       // ============================================================
       if (path.startsWith('/api/pesanan/') && method === 'DELETE') {
         const orderId = decodeURIComponent(path.split('/').pop());
@@ -201,25 +222,20 @@ if (path !== '/') {
       }
 
       // ============================================================
-      // ENDPOINT 6: GET — Health check (publik, tanpa token)
+      // 404 — Route tidak dikenal
       // ============================================================
-      if (path === '/' && method === 'GET') {
-        return new Response(JSON.stringify({
-          status: 'OK',
-          app: 'AppNesia Worker (Cloudflare)',
-          time: new Date().toISOString()
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Rute tidak ditemukan
-      return new Response(JSON.stringify({ error: 'Not Found' }), {
+      return new Response(JSON.stringify({
+        error: 'Not Found',
+        path: path,
+        method: method
+      }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
 
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), {
+      return new Response(JSON.stringify({
+        error: e.message || 'Internal Error'
+      }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }

@@ -48,6 +48,7 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;display:none;z-index:100;max-width:90%;text-align:center}
 .toast.on{display:block}
+.toast.err{background:#ff5a4d;color:#fff}
 </style>
 </head>
 <body>
@@ -74,6 +75,10 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
   <h2><span class="spinner"></span> Menunggu Konfirmasi</h2>
   <p>Admin sedang cek pembayaran kamu. Halaman ini otomatis update saat dikonfirmasi.</p>
   <p style="margin-top:10px;font-size:13px;color:var(--muted)">Order ID: <b id="waitOrderId">-</b></p>
+  <a class="btn alt" href="index.html" style="margin-top:16px">🏠 Buka AppNesia</a>
+  <p style="margin-top:10px;font-size:12px;color:var(--muted)">
+    Kamu boleh tutup halaman ini. Saat admin konfirmasi, produk otomatis aktif di AppNesia.
+  </p>
 </div>
 
 <div id="boxBayar">
@@ -106,7 +111,7 @@ header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bott
 
     <div class="step"><b>1</b><span>Transfer <b id="nominalTransfer">Rp0</b> ke nomor di atas.</span></div>
     <div class="step"><b>2</b><span>Klik tombol <b>"Saya Sudah Bayar"</b> di bawah.</span></div>
-    <div class="step"><b>3</b><span>Tunggu admin konfirmasi. Halaman akan otomatis update.</span></div>
+    <div class="step"><b>3</b><span>Tunggu admin konfirmasi. Produk otomatis aktif di AppNesia.</span></div>
 
     <button class="btn ok" id="sudahBayarBtn">✅ Saya Sudah Bayar</button>
     <button class="btn alt" id="batalBtn">❌ Batal / Gagal Bayar</button>
@@ -123,8 +128,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 // ============================================================
 // KONFIGURASI SUPABASE
 // ============================================================
-const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co"
-SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
+const SUPABASE_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
 const NOMOR_GOPAY  = '0895403096967';
 const NOMOR_DANA   = '0895403096967';
 // ============================================================
@@ -132,25 +137,171 @@ const NOMOR_DANA   = '0895403096967';
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 let metode = 'gopay';
-let produk = { nama: 'AppNesia Premium', deskripsi: '', harga: 2000, ikon: '⭐', id: 'premium' };
+let produk = { nama: 'AppNesia Premium', deskripsi: '', harga: 2000, ikon: '⭐', id: 'premium', fitur: [] };
 let orderId = null;
 let pollingAktif = false;
+let pollingTimer = null;
 let statusTerakhir = null;
 
+// ============================================================
+// 🔑 PENDING ORDER — biar gak bikin pesanan baru
+// ============================================================
+const PENDING_KEY = 'an_pending_order';
+
+function simpanPending(orderId, produk) {
+  try {
+    localStorage.setItem(PENDING_KEY, JSON.stringify({
+      order_id: orderId,
+      produk: produk,
+      created_at: Date.now()
+    }));
+  } catch(e) {}
+}
+
+function ambilPending() {
+  try {
+    const data = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
+    if (!data || !data.order_id) return null;
+    // Kalau lebih dari 7 hari, hapus
+    if (Date.now() - data.created_at > 7 * 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(PENDING_KEY);
+      return null;
+    }
+    return data;
+  } catch(e) { return null; }
+}
+
+function hapusPending() {
+  localStorage.removeItem(PENDING_KEY);
+}
+
+// ============================================================
+// 🎁 AKTIVASI PRODUK — simpan ke localStorage
+// ============================================================
+function aktifkanProduk(p) {
+  console.log('🎁 Mengaktifkan produk:', p);
+  
+  // Simpan daftar produk yang dibeli
+  try {
+    const arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
+    if (!arr.includes(p.id)) arr.push(p.id);
+    localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
+  } catch(e) {}
+  
+  // Simpan produk terakhir
+  localStorage.setItem('an_produk_terakhir', p.id);
+  
+  // Simpan detail produk lengkap (untuk referensi AppNesia)
+  localStorage.setItem('an_produk_aktif_' + p.id, JSON.stringify({
+    id: p.id,
+    nama: p.nama,
+    fitur: p.fitur || [],
+    aktif_sejak: new Date().toISOString()
+  }));
+  
+  // Aktifkan flag masing-masing fitur
+  const fiturList = Array.isArray(p.fitur) ? p.fitur : [];
+  
+  if (fiturList.includes('favorit-instan') || p.id === 'premium' || p.id === 'premium-plus') {
+    localStorage.setItem('an_premium', 'aktif');
+    localStorage.setItem('an_favorit_instan', 'aktif');
+  }
+  if (fiturList.includes('akses-offline')) {
+    localStorage.setItem('an_akses_offline', 'aktif');
+  }
+  if (fiturList.includes('fitur-stabil') || p.id === 'fitur-stabil') {
+    localStorage.setItem('an_fitur_stabil', 'aktif');
+    localStorage.setItem('an_premium', 'aktif');
+  }
+  if (fiturList.includes('ubah-warna') || p.id === 'ubah-warna') {
+    localStorage.setItem('an_ubah_warna', 'aktif');
+  }
+  if (fiturList.includes('developer-plus') || p.id === 'developer-plus') {
+    localStorage.setItem('an_developer_plus', 'aktif');
+  }
+  
+  // Simpan juga sebagai "produk aktif terakhir" untuk AppNesia
+  localStorage.setItem('an_produk_aktif', JSON.stringify({
+    id: p.id,
+    nama: p.nama,
+    fitur: fiturList,
+    aktif_sejak: new Date().toISOString()
+  }));
+  
+  console.log('✅ Produk teraktifkan, fitur:', fiturList);
+}
+
+// Ambil produk dari localStorage
 try {
   const p = JSON.parse(localStorage.getItem('an_produk') || 'null');
-  if(p && p.nama) produk = p;
+  if (p && p.nama) produk = p;
 } catch(e){}
+console.log('📦 Produk yang dibeli:', produk);
 
-const rupiah = n => 'Rp' + n.toLocaleString('id-ID');
+const rupiah = n => 'Rp' + Number(n).toLocaleString('id-ID');
 const genOrderId = () => 'APP-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
 
 // ============================================================
-// BUAT PESANAN DI SUPABASE
+// BUAT PESANAN / LANJUT PESANAN LAMA
 // ============================================================
-async function buatPesanan(){
+async function buatPesanan() {
+  // Cek dulu: ada order lama yang belum selesai?
+  const pending = ambilPending();
+  
+  if (pending) {
+    console.log('🔍 Ada order lama:', pending.order_id);
+    
+    const { data, error } = await sb
+      .from('pesanan')
+      .select('*')
+      .eq('order_id', pending.order_id)
+      .maybeSingle();
+    
+    if (!error && data) {
+      // Update produk dari data
+      if (data.produk_nama) {
+        produk = {
+          id: data.produk,
+          nama: data.produk_nama,
+          harga: data.harga,
+          ikon: produk.ikon || '⭐',
+          deskripsi: produk.deskripsi || '',
+          fitur: produk.fitur || []
+        };
+        renderProduk();
+      }
+      
+      orderId = pending.order_id;
+      $('orderId').textContent = orderId;
+      console.log('✅ Lanjut order lama:', orderId);
+      
+      const status = String(data.status || 'pending').toLowerCase();
+      
+      if (status === 'lunas') {
+        aktifkanProduk(produk);
+        hapusPending();
+        handleStatus('lunas');
+      } else if (status === 'menunggu') {
+        handleStatus('menunggu');
+        pantauStatus();
+      } else if (status === 'gagal') {
+        hapusPending();
+        handleStatus('gagal');
+      } else {
+        // pending — pantau
+        handleStatus('pending');
+        pantauStatus();
+      }
+      return;
+    } else {
+      console.log('⚠️ Order lama gak ketemu, hapus');
+      hapusPending();
+    }
+  }
+  
+  // Bikin order baru
   orderId = genOrderId();
-  console.log('Mencoba buat pesanan:', orderId);
+  console.log('🔄 Bikin pesanan baru:', orderId);
   $('orderId').textContent = 'Memuat...';
 
   const { error } = await sb.from('pesanan').insert({
@@ -161,104 +312,106 @@ async function buatPesanan(){
     status: 'pending'
   });
 
-  if(error){
-    console.error('ERROR INSERT:', error);
+  if (error) {
+    console.error('❌ ERROR INSERT:', error);
     $('orderId').textContent = '-';
     toast('Gagal: ' + (error.message || error.code || 'unknown'), true);
     return;
   }
 
-  console.log('Pesanan berhasil dibuat:', orderId);
+  console.log('✅ Pesanan dibuat:', orderId);
   $('orderId').textContent = orderId;
+  
+  // Simpan pending
+  simpanPending(orderId, produk);
+  
   pantauStatus();
 }
 
 // ============================================================
 // PANTAU STATUS VIA POLLING
 // ============================================================
-function pantauStatus(){
-  if(!orderId) return;
-  if(pollingAktif) return;
+function pantauStatus() {
+  if (!orderId || pollingAktif) return;
   pollingAktif = true;
-  console.log('Mulai polling untuk:', orderId);
+  console.log('👀 Mulai polling:', orderId);
+  
   cekStatus();
-  setInterval(cekStatus, 3000);
+  pollingTimer = setInterval(cekStatus, 5000);
 }
 
-async function cekStatus(){
-  if(!orderId) return;
+function stopPolling() {
+  if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+  pollingAktif = false;
+}
+
+async function cekStatus() {
+  if (!orderId) return;
   const { data, error } = await sb
     .from('pesanan')
     .select('status')
     .eq('order_id', orderId)
-    .single();
+    .maybeSingle();
 
-  if(error){ console.warn('Gagal cek status:', error.message); return; }
-  if(!data) return;
+  if (error) { console.warn('⚠️ Gagal cek status:', error.message); return; }
+  if (!data) return;
 
   const status = String(data.status || '').toLowerCase();
-  if(status !== statusTerakhir){
-    console.log('Status berubah:', statusTerakhir, '→', status);
+  if (status !== statusTerakhir) {
+    console.log('🔄 Status:', statusTerakhir, '→', status);
     statusTerakhir = status;
   }
   handleStatus(status);
 }
 
 // ============================================================
-// HANDLE STATUS — INI YANG PENTING
+// HANDLE STATUS
 // ============================================================
-function handleStatus(status){
-  if(status === 'lunas'){
-    $('boxBayar').style.display = 'none';
-    $('boxWait').style.display = 'none';
-    $('boxErr').style.display = 'none';
-    $('boxOk').style.display = 'block';
+function handleStatus(status) {
+  const boxes = { ok: $('boxOk'), err: $('boxErr'), wait: $('boxWait'), bayar: $('boxBayar') };
+
+  if (status === 'lunas') {
+    boxes.bayar.style.display = 'none';
+    boxes.wait.style.display = 'none';
+    boxes.err.style.display = 'none';
+    boxes.ok.style.display = 'block';
+
+    // Aktifkan produk
+    aktifkanProduk(produk);
+    hapusPending();
     
-    // === SIMPAN PRODUK KE localStorage ===
-    try {
-      var arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]');
-      if(arr.indexOf(produk.id) === -1) arr.push(produk.id);
-      localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
-      console.log('✅ Produk tersimpan:', arr);
-    } catch(e){
-      console.error('❌ Gagal simpan produk:', e);
-    }
-    
-    // Simpan status masing-masing fitur
-    if(produk.id === 'premium' || produk.id === 'premium-plus' || produk.id === 'fitur stabil'){
-      localStorage.setItem('an_premium', 'aktif');
-    }
-    if(produk.id === 'ubah halaman jadi warna sesuka' || produk.id === 'fitur stabil'){
-      localStorage.setItem('an_ubah_warna', 'aktif');
-    }
-    if(produk.id === 'fitur stabil'){
-      localStorage.setItem('an_fitur_stabil', 'aktif');
-    }
-    if(produk.id === 'akun developer plus'){
-      localStorage.setItem('an_developer_plus', 'aktif');
-    }
-    
+    stopPolling();
     window.scrollTo(0, 0);
-  } else if(status === 'gagal'){
-    $('boxBayar').style.display = 'none';
-    $('boxWait').style.display = 'none';
-    $('boxOk').style.display = 'none';
-    $('boxErr').style.display = 'block';
+
+  } else if (status === 'gagal') {
+    boxes.bayar.style.display = 'none';
+    boxes.wait.style.display = 'none';
+    boxes.ok.style.display = 'none';
+    boxes.err.style.display = 'block';
+    hapusPending();
+    stopPolling();
     window.scrollTo(0, 0);
-  } else if(status === 'menunggu'){
-    $('boxBayar').style.display = 'none';
-    $('boxOk').style.display = 'none';
-    $('boxErr').style.display = 'none';
-    $('boxWait').style.display = 'block';
+
+  } else if (status === 'menunggu') {
+    boxes.bayar.style.display = 'none';
+    boxes.ok.style.display = 'none';
+    boxes.err.style.display = 'none';
+    boxes.wait.style.display = 'block';
     $('waitOrderId').textContent = orderId;
     window.scrollTo(0, 0);
+
+  } else {
+    boxes.ok.style.display = 'none';
+    boxes.err.style.display = 'none';
+    boxes.wait.style.display = 'none';
+    boxes.bayar.style.display = 'block';
   }
 }
 
 // ============================================================
-// RENDER PRODUK
+// RENDER
 // ============================================================
-function renderProduk(){
+function renderProduk() {
   $('ikonProduk').textContent = produk.ikon || '⭐';
   $('namaProduk').textContent = produk.nama;
   $('deskProduk').textContent = produk.deskripsi || '';
@@ -266,15 +419,17 @@ function renderProduk(){
   $('nominalTransfer').textContent = rupiah(produk.harga);
 }
 
-function updateTampilan(){
-  if(metode === 'gopay'){
+function updateTampilan() {
+  if (metode === 'gopay') {
     $('labelMetode').textContent = 'Nomor GoPay';
     $('nomorTujuan').textContent = NOMOR_GOPAY;
   } else {
     $('labelMetode').textContent = 'Nomor DANA';
     $('nomorTujuan').textContent = NOMOR_DANA;
   }
-  $('pilihMetode').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.metode === metode));
+  $('pilihMetode').querySelectorAll('button').forEach(b =>
+    b.classList.toggle('on', b.dataset.metode === metode)
+  );
 }
 
 // ============================================================
@@ -282,39 +437,42 @@ function updateTampilan(){
 // ============================================================
 $('pilihMetode').addEventListener('click', e => {
   const t = e.target.closest('button[data-metode]');
-  if(!t) return;
+  if (!t) return;
   metode = t.dataset.metode;
   updateTampilan();
 });
 
 $('salinBtn').addEventListener('click', () => {
   const nomor = metode === 'gopay' ? NOMOR_GOPAY : NOMOR_DANA;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(nomor).then(() => toast('Nomor disalin'), () => toast('Nomor: ' + nomor));
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(nomor)
+      .then(() => toast('Nomor disalin'))
+      .catch(() => toast('Nomor: ' + nomor));
   } else toast('Nomor: ' + nomor);
 });
 
 $('sudahBayarBtn').addEventListener('click', async () => {
-  if(!orderId){ toast('Pesanan belum siap', true); return; }
-  console.log('Update status → menunggu:', orderId);
+  if (!orderId) { toast('Pesanan belum siap', true); return; }
+  console.log('📤 Update → menunggu:', orderId);
   const { error } = await sb.from('pesanan')
     .update({ status: 'menunggu', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
-  if(error){ console.error('ERROR UPDATE:', error); toast('Gagal: ' + (error.message || error.code), true); return; }
+  if (error) { console.error(error); toast('Gagal: ' + (error.message || error.code), true); return; }
   handleStatus('menunggu');
 });
 
 $('batalBtn').addEventListener('click', async () => {
-  if(!orderId){ toast('Pesanan belum siap', true); return; }
-  console.log('Update status → gagal:', orderId);
+  if (!orderId) { toast('Pesanan belum siap', true); return; }
+  if (!confirm('Yakin batalkan pesanan ini?')) return;
+  console.log('📤 Update → gagal:', orderId);
   const { error } = await sb.from('pesanan')
     .update({ status: 'gagal', updated_at: new Date().toISOString() })
     .eq('order_id', orderId);
-  if(error){ console.error('ERROR UPDATE:', error); toast('Gagal: ' + (error.message || error.code), true); return; }
+  if (error) { toast('Gagal: ' + (error.message || error.code), true); return; }
   handleStatus('gagal');
 });
 
-function toast(t, isErr){
+function toast(t, isErr) {
   const el = $('toast');
   el.textContent = t;
   el.className = 'toast on' + (isErr ? ' err' : '');
@@ -330,4 +488,4 @@ updateTampilan();
 buatPesanan();
 </script>
 </body>
-</html>
+  </html>

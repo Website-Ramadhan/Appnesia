@@ -249,7 +249,7 @@ html,body{transition:background-color .6s}
 <div class="warna-picker" id="warnaPicker" onclick="gantiWarna()">🎨</div>
 
 <!-- ============================================================ -->
-<!-- AUTO-CEK STATUS PESANAN TERTUNDA -->
+<!-- AUTO-CEK STATUS PESANAN — SCRIPT TERPISAH -->
 <!-- Cek apakah admin sudah konfirmasi pesanan yang pending -->
 <!-- ============================================================ -->
 <script>
@@ -260,55 +260,39 @@ html,body{transition:background-color .6s}
       console.log('ℹ️ Tidak ada pesanan tertunda');
       return;
     }
-
     if (Date.now() - pending.created_at > 7 * 24 * 60 * 60 * 1000) {
       localStorage.removeItem('an_pending_order');
       return;
     }
-
     console.log('🔍 Cek status pesanan:', pending.order_id);
-
     const SB_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
-
     const res = await fetch(
-      `${SB_URL}/rest/v1/pesanan?order_id=eq.${encodeURIComponent(pending.order_id)}&select=*`,
-      {
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': `Bearer ${SB_KEY}`
-        }
-      }
+      SB_URL + '/rest/v1/pesanan?order_id=eq.' + encodeURIComponent(pending.order_id) + '&select=*',
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
     );
-
     const data = await res.json();
     if (!data || !data.length) return;
-
     const pesanan = data[0];
     const status = String(pesanan.status || '').toLowerCase();
     const produkId = pesanan.produk;
     const fiturList = (pending.produk && pending.produk.fitur) || [];
-
     console.log('📦 Status:', status, '| Produk:', produkId, '| Fitur:', fiturList);
-
     if (status === 'lunas') {
-      console.log('✅ LUNAS! Aktifkan produk:', produkId);
-
+      console.log('✅ LUNAS! Aktifkan:', produkId);
       let arr = [];
       try { arr = JSON.parse(localStorage.getItem('an_produk_dibeli') || '[]'); } catch(e){}
       if (!arr.includes(produkId)) arr.push(produkId);
       localStorage.setItem('an_produk_dibeli', JSON.stringify(arr));
       localStorage.setItem('an_produk_terakhir', produkId);
-
-      const detailProduk = {
+      const detail = {
         id: produkId,
         nama: pesanan.produk_nama,
         fitur: fiturList,
         aktif_sejak: new Date().toISOString()
       };
-      localStorage.setItem('an_produk_aktif', JSON.stringify(detailProduk));
-      localStorage.setItem('an_produk_aktif_' + produkId, JSON.stringify(detailProduk));
-
+      localStorage.setItem('an_produk_aktif', JSON.stringify(detail));
+      localStorage.setItem('an_produk_aktif_' + produkId, JSON.stringify(detail));
       if (fiturList.includes('favorit-instan') || produkId === 'premium') {
         localStorage.setItem('an_premium', 'aktif');
         localStorage.setItem('an_favorit_instan', 'aktif');
@@ -326,19 +310,15 @@ html,body{transition:background-color .6s}
       if (fiturList.includes('developer-plus') || produkId === 'akun developer plus') {
         localStorage.setItem('an_developer_plus', 'aktif');
       }
-
       localStorage.removeItem('an_pending_order');
-
-      setTimeout(() => {
+      setTimeout(function() {
         alert('🎉 Pembayaran dikonfirmasi admin!\n\nFitur ' + (pesanan.produk_nama || produkId) + ' sudah aktif.');
         location.reload();
       }, 800);
-
     } else if (status === 'gagal') {
-      console.log('❌ Pesanan gagal, hapus pending');
       localStorage.removeItem('an_pending_order');
     } else {
-      console.log('⏳ Pesanan masih', status);
+      console.log('⏳ Masih', status);
     }
   } catch(e) {
     console.warn('Auto-cek gagal:', e);
@@ -406,6 +386,14 @@ function cekFiturTerbuka(){
   if(punyaProduk("akun developer plus")){
     localStorage.setItem("an_developer_plus", "aktif");
   }
+  // Baca juga flag akses-offline
+  var detail = null;
+  try { detail = JSON.parse(localStorage.getItem("an_produk_aktif") || "null"); } catch(e){}
+  if(detail && Array.isArray(detail.fitur)){
+    if(detail.fitur.includes("akses-offline")){
+      localStorage.setItem("an_akses_offline", "aktif");
+    }
+  }
 }
 cekFiturTerbuka();
 
@@ -450,7 +438,7 @@ function cekTombolWarna(){
 }
 cekTombolWarna();
 
-/* === FITUR STABIL === */
+/* === FITUR STABIL (BANNER PRIORITAS) === */
 function cekTombolStabil(){
   var punyaStabil = localStorage.getItem("an_fitur_stabil") === "aktif";
   var el = document.getElementById("priorityBar");
@@ -745,4 +733,4 @@ if('serviceWorker' in navigator){
 if(!navigator.onLine){ tampilkanOffline(); } else { tampilkanLoading(); drawChips(); draw(); muatDataUlang(); }
 </script>
 </body>
-  </html>
+</html>

@@ -51,7 +51,7 @@ Setelah transfer, klik "Saya Sudah Bayar" di halaman pembayaran. Produk otomatis
 
 <script>
 // ============================================================
-// DAFTAR PRODUK
+// DAFTAR PRODUK + FITUR
 // ============================================================
 var PRODUK = [
   {
@@ -60,28 +60,32 @@ var PRODUK = [
     nama: "AppNesia Premium",
     deskripsi: "Buka fitur favorit instan & akses offline.",
     harga: 19000,
-    badge: "Populer"
+    badge: "Populer",
+    fitur: ["favorit-instan", "akses-offline"]
   },
   {
     id: "fitur stabil",
     ikon: "💎",
     nama: "Tombol fitur berfungsi stabil",
     deskripsi: "Semua fitur Premium + dukungan prioritas.",
-    harga: 27000
+    harga: 27000,
+    fitur: ["favorit-instan", "akses-offline", "fitur-stabil"]
   },
   {
     id: "ubah halaman jadi warna sesuka",
     ikon: "🌐",
     nama: "Ubah warna halaman",
     deskripsi: "Ganti warna tampilan AppNesia sesuai selera.",
-    harga: 34000
+    harga: 34000,
+    fitur: ["ubah-warna"]
   },
   {
     id: "akun developer plus",
     ikon: "🤖",
     nama: "Akun developer plus",
     deskripsi: "Fitur tambahan untuk developer AppNesia.",
-    harga: 85000
+    harga: 85000,
+    fitur: ["developer-plus"]
   }
 ];
 
@@ -107,8 +111,14 @@ document.addEventListener("click", function(e){
   if(!t) return;
   var p = PRODUK.filter(function(x){ return x.id === t.dataset.id; })[0];
   if(!p) return;
+  
+  console.log("🛒 Beli produk:", p);
+  
+  // Simpan produk LENGKAP dengan fitur
   try { localStorage.setItem("an_produk", JSON.stringify(p)); } catch(err){}
-  location.href = "bayar.html";
+  
+  // Redirect ke halaman pembayaran
+  location.href = "bayar.html";  // ← pastikan nama file ini benar
 });
 
 render();

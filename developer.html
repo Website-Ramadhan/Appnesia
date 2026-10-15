@@ -31,6 +31,7 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
 .harga-box.on{display:block}
 .btn{width:100%;padding:14px;border-radius:12px;border:0;background:var(--accent);color:#1a0808;font:inherit;font-weight:700;font-size:15px;cursor:pointer;margin-top:14px;display:block;text-align:center;text-decoration:none;font-family:inherit}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.alt{background:transparent;border:1px solid var(--line);color:var(--text)}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--amber);color:#1a0808;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;display:none;z-index:200;max-width:calc(100% - 40px);text-align:center;line-height:1.4}
 .toast.on{display:block}
 .toast.err{background:#ff5a4d;color:#fff}
@@ -40,7 +41,7 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
 .spinner{display:inline-block;width:16px;height:16px;border:3px solid #1a0808;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* === OVERLAY BLOKIR BROWSER === */
+/* === OVERLAY BLOKIR === */
 #blockOverlay{position:fixed;inset:0;z-index:99999;background:#1a0808;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;overflow-y:auto}
 #blockOverlay .box{max-width:420px;width:100%;background:#2a0f0f;border:1px solid #4a1c1c;border-radius:20px;padding:40px 24px;text-align:center;box-sizing:border-box}
 #blockOverlay .ikon{font-size:80px;margin-bottom:20px;animation:shake 1s ease infinite}
@@ -51,15 +52,52 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
 #blockOverlay .info{background:#1a0808;border:1px solid #4a1c1c;border-radius:12px;padding:14px 16px;margin:20px 0;font-size:13px;color:#b9a0a0;text-align:left;line-height:1.6}
 #blockOverlay .info b{color:#f5a623}
 #blockOverlay .btn-dl{display:inline-block;padding:14px 28px;background:#ff5a4d;color:#1a0808;text-decoration:none;border-radius:12px;font-weight:700;font-size:15px;margin-top:8px}
-#blockOverlay .btn-dl:active{opacity:.85}
+
+/* === NOTIF BANNER === */
+.notif-banner{position:fixed;top:0;left:0;right:0;z-index:500;padding:calc(16px + env(safe-area-inset-top,0)) 16px 16px;transform:translateY(-100%);transition:transform .4s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.notif-banner.on{transform:translateY(0)}
+.notif-banner.ok{background:linear-gradient(135deg,#1e3a26,#2a4a36);border-bottom:2px solid #7bd88f}
+.notif-banner.err{background:linear-gradient(135deg,#3a1e1e,#4a2020);border-bottom:2px solid #ff5a4d}
+.notif-banner.info{background:linear-gradient(135deg,#1e2a3a,#2a3a4a);border-bottom:2px solid #4da3ff}
+.notif-banner .notif-inner{display:flex;align-items:flex-start;gap:12px;max-width:640px;margin:0 auto}
+.notif-banner .notif-emoji{font-size:32px;flex:none;line-height:1}
+.notif-banner .notif-teks{flex:1;min-width:0}
+.notif-banner h4{margin:0 0 4px;font-size:15px;color:#fff;font-weight:700}
+.notif-banner p{margin:0;font-size:13px;color:#dcc9c9;line-height:1.5}
+.notif-banner .notif-close{background:rgba(255,255,255,.15);border:0;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex:none;line-height:1;padding:0;font-family:inherit}
+
+/* === LIVE INDICATOR === */
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.live-dot{width:8px;height:8px;background:#7bd88f;border-radius:50%;animation:pulse-dot 1.5s ease infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* === STATUS BOX === */
+.status-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.status-box h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase}
+.status-pending{background:#fff3cd;color:#856404}
+.status-approved{background:#d4edda;color:#155724}
+.status-rejected{background:#f8d7da;color:#721c24}
+.status-item{font-size:13px;color:#dcc9c9;padding:8px 0;border-bottom:1px solid var(--line)}
+.status-item:last-child{border-bottom:0}
+.status-item b{color:var(--text)}
 </style>
 </head>
 <body>
 
-<!-- ============================================================ -->
-<!-- 🛡️ OVERLAY BLOKIR — TAMPIL BY DEFAULT                        -->
-<!-- JS bakal hide overlay INI + show form, KALAU detect APK      -->
-<!-- ============================================================ -->
+<!-- === NOTIF BANNER === -->
+<div class="notif-banner" id="notifBanner">
+  <div class="notif-inner">
+    <div class="notif-emoji" id="notifEmoji">🎉</div>
+    <div class="notif-teks">
+      <h4 id="notifJudul">Notifikasi</h4>
+      <p id="notifPesan">Pesan notifikasi</p>
+    </div>
+    <button class="notif-close" onclick="tutupNotif()">×</button>
+  </div>
+</div>
+
+<!-- === OVERLAY BLOKIR === -->
 <div id="blockOverlay">
   <div class="box">
     <div class="ikon">📱</div>
@@ -73,129 +111,116 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- FORM ASLI — DISEMBUNYIKAN BY DEFAULT                          -->
-<!-- ============================================================ -->
+<!-- === KONTEN UTAMA === -->
 <div id="mainContent" style="display:none">
   <header><div class="in">
   <span class="brand">📤 Submit App Developer</span>
   </div></header>
 
-  <h1>Kirim Aplikasi ke AppNesia</h1>
-  <p class="sub">Isi form di bawah. Aplikasi kamu akan di-review admin sebelum dipublikasikan.</p>
-
-  <div class="info-box">
-    <b>⚠️ Penting:</b> Dengan mengirim form ini, kamu menyatakan aplikasi ini milikmu atau kamu punya izin untuk publish. AppNesia tidak bertanggung jawab atas pelanggaran hak cipta.
+  <!-- LIVE INDICATOR -->
+  <div class="live-indicator" id="liveIndicator" style="display:none">
+    <div class="live-dot"></div>
+    <span>Live — cek status otomatis tiap 30 detik</span>
   </div>
 
-  <form id="formSubmit" onsubmit="return false;">
-    <div class="card">
-      <h3>📱 Info Aplikasi</h3>
-      <p class="card-sub">Data aplikasi yang mau dipublikasikan</p>
+  <!-- STATUS SUBMISSION -->
+  <div id="statusSection" style="display:none">
+    <div class="status-box">
+      <h3>📋 Submission Terakhir Kamu</h3>
+      <div id="statusList"></div>
+      <button class="btn alt" onclick="cekStatusSekarang()" style="margin-top:12px">🔄 Cek Status Sekarang</button>
+    </div>
+  </div>
 
-      <label for="nama">Nama Aplikasi *</label>
-      <input type="text" id="nama" required maxlength="60" placeholder="Contoh: Mobile Legends">
-      <div class="hint">Maks 60 karakter</div>
+  <!-- FORM SUBMIT -->
+  <div id="formSection">
+    <h1>Kirim Aplikasi ke AppNesia</h1>
+    <p class="sub">Isi form di bawah. Aplikasi kamu akan di-review admin sebelum dipublikasikan.</p>
 
-      <label for="deskripsi">Deskripsi Singkat *</label>
-      <textarea id="deskripsi" required maxlength="200" placeholder="Contoh: Game MOBA 5 lawan 5 yang seru"></textarea>
-      <div class="hint">Maks 200 karakter</div>
-
-      <label for="ikon">Ikon / Emoji *</label>
-      <input type="text" id="ikon" required maxlength="10" placeholder="Contoh: 🎮 atau URL gambar">
-      <div class="hint">Emoji (contoh: 🎮 🎯 🚀) atau URL gambar</div>
-
-      <label for="kategori">Kategori *</label>
-      <select id="kategori" required>
-        <option value="">-- Pilih kategori --</option>
-        <option value="belanja">🛍️ Belanja</option>
-        <option value="keuangan">💳 Keuangan</option>
-        <option value="perjalanan">🧭 Perjalanan</option>
-        <option value="sosial">💬 Sosial</option>
-        <option value="hiburan">🎬 Hiburan</option>
-        <option value="produktif">🗂️ Produktivitas</option>
-        <option value="game">🎮 Game</option>
-      </select>
-
-      <label for="link_download">Link Download *</label>
-      <input type="url" id="link_download" required placeholder="https://play.google.com/store/apps/... atau https://drive.google.com/...">
-      <div class="hint">Link Play Store, Google Drive, MediaFire, atau hosting kamu</div>
+    <div class="info-box">
+      <b>⚠️ Penting:</b> Dengan mengirim form ini, kamu menyatakan aplikasi ini milikmu atau kamu punya izin untuk publish. AppNesia tidak bertanggung jawab atas pelanggaran hak cipta.
     </div>
 
-    <div class="card">
-      <h3>💰 Tipe Aplikasi</h3>
-      <p class="card-sub">Kamu yang tentukan, gratis atau premium</p>
+    <form id="formSubmit" onsubmit="return false;">
+      <div class="card">
+        <h3>📱 Info Aplikasi</h3>
+        <label for="nama">Nama Aplikasi *</label>
+        <input type="text" id="nama" required maxlength="60" placeholder="Contoh: Mobile Legends">
 
-      <label>Tipe *</label>
-      <div class="tipe-pilih" id="tipePilih">
-        <button type="button" data-tipe="gratis" class="on">🆓 Gratis</button>
-        <button type="button" data-tipe="premium">💰 Premium</button>
+        <label for="deskripsi">Deskripsi Singkat *</label>
+        <textarea id="deskripsi" required maxlength="200" placeholder="Contoh: Game MOBA 5 lawan 5"></textarea>
+
+        <label for="ikon">Ikon / Emoji *</label>
+        <input type="text" id="ikon" required maxlength="10" placeholder="Contoh: 🎮">
+
+        <label for="kategori">Kategori *</label>
+        <select id="kategori" required>
+          <option value="">-- Pilih kategori --</option>
+          <option value="belanja">🛍️ Belanja</option>
+          <option value="keuangan">💳 Keuangan</option>
+          <option value="perjalanan">🧭 Perjalanan</option>
+          <option value="sosial">💬 Sosial</option>
+          <option value="hiburan">🎬 Hiburan</option>
+          <option value="produktif">🗂️ Produktivitas</option>
+          <option value="game">🎮 Game</option>
+        </select>
+
+        <label for="link_download">Link Download *</label>
+        <input type="url" id="link_download" required placeholder="https://play.google.com/store/apps/...">
       </div>
 
-      <div class="harga-box" id="hargaBox">
-        <label for="harga">Harga (Rp) *</label>
-        <input type="number" id="harga" min="1000" step="500" placeholder="Contoh: 15000">
-        <div class="hint">Minimal Rp1.000. Kamu tentukan harga aplikasimu</div>
+      <div class="card">
+        <h3>💰 Tipe Aplikasi</h3>
+        <div class="tipe-pilih" id="tipePilih">
+          <button type="button" data-tipe="gratis" class="on">🆓 Gratis</button>
+          <button type="button" data-tipe="premium">💰 Premium</button>
+        </div>
+        <div class="harga-box" id="hargaBox">
+          <label for="harga">Harga (Rp) *</label>
+          <input type="number" id="harga" min="1000" step="500" placeholder="15000">
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h3>👤 Info Developer</h3>
-      <p class="card-sub">Biar admin bisa hubungi kamu kalau ada masalah</p>
+      <div class="card">
+        <h3>👤 Info Developer</h3>
+        <label for="dev_nama">Nama Developer *</label>
+        <input type="text" id="dev_nama" required maxlength="60" placeholder="Ramadhan Studio">
+        <label for="dev_kontak">Kontak (WhatsApp/Email) *</label>
+        <input type="text" id="dev_kontak" required maxlength="100" placeholder="0812xxx atau email@gmail.com">
+        <label for="dev_bukti">Bukti Kepemilikan</label>
+        <input type="url" id="dev_bukti" placeholder="https://play.google.com/store/apps/developer?id=...">
+      </div>
 
-      <label for="dev_nama">Nama / Nama Developer *</label>
-      <input type="text" id="dev_nama" required maxlength="60" placeholder="Contoh: Ramadhan Studio">
-
-      <label for="dev_kontak">Kontak (WhatsApp/Email) *</label>
-      <input type="text" id="dev_kontak" required maxlength="100" placeholder="Contoh: 0812xxx atau email@gmail.com">
-
-      <label for="dev_bukti">Bukti Kepemilikan</label>
-      <input type="url" id="dev_bukti" placeholder="https://play.google.com/store/apps/developer?id=...">
-      <div class="hint">Link ke halaman developer di Play Store (opsional)</div>
-    </div>
-
-    <button type="submit" class="btn" id="btnSubmit">📤 Kirim Aplikasi</button>
-  </form>
+      <button type="submit" class="btn" id="btnSubmit">📤 Kirim Aplikasi</button>
+    </form>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-// 🛡️ DETEKSI APK — 10 CEK
+// 🛡️ DETEKSI APK
 // ============================================================
 (function(){
   var diAPK = false;
   var ua = "";
   try { ua = navigator.userAgent.toLowerCase(); } catch(e){}
 
-  // Cek Cordova
   if (typeof window.cordova !== "undefined") diAPK = true;
   if (ua.indexOf("cordova") !== -1) diAPK = true;
   if (ua.indexOf("phonegap") !== -1) diAPK = true;
-
-  // Cek Capacitor
   try {
     if (window.Capacitor) {
       if (window.Capacitor.platform === "android" || window.Capacitor.platform === "ios") diAPK = true;
       if (typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()) diAPK = true;
-      if (typeof window.Capacitor.isNative === "function" && window.Capacitor.isNative()) diAPK = true;
     }
   } catch(e){}
   if (ua.indexOf("capacitor") !== -1) diAPK = true;
-
-  // Cek protocol
   try {
     if (window.location.protocol === "file:") diAPK = true;
-    if (window.location.href.indexOf("capacitor://") !== -1) diAPK = true;
-    if (window.location.href.indexOf("ionic://") !== -1) diAPK = true;
   } catch(e){}
-
-  // Cek Android WebView
   if (ua.indexOf("; wv)") !== -1) diAPK = true;
-  if (ua.indexOf("android") !== -1 && ua.indexOf("version/") !== -1) diAPK = true;
-
-  // Cek Android bridge
   try {
     if (typeof window.Android !== "undefined") diAPK = true;
     if (typeof window.AndroidBridge !== "undefined") diAPK = true;
@@ -207,15 +232,18 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
   var main = document.getElementById("mainContent");
 
   if (diAPK) {
-    // APK → sembunyikan overlay, tampilkan form
     overlay.style.display = "none";
     main.style.display = "block";
+    // Mulai polling + cek awal
+    setTimeout(function(){
+      cekStatusSubmission();
+      mulaiPolling();
+    }, 1000);
   }
-  // else: biarkan overlay show, form tetap hidden
 })();
 
 // ============================================================
-// FORM LOGIC
+// KONFIGURASI
 // ============================================================
 var SB_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
@@ -223,93 +251,301 @@ var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 var $ = function(id){ return document.getElementById(id); };
 var tipe = 'gratis';
 
-var tipePilih = $('tipePilih');
-if(tipePilih){
-  tipePilih.addEventListener('click', function(e){
-    var btn = e.target.closest('button[data-tipe]');
-    if(!btn) return;
-    tipe = btn.dataset.tipe;
-    var buttons = document.querySelectorAll('#tipePilih button');
-    for(var i = 0; i < buttons.length; i++){
-      buttons[i].classList.toggle('on', buttons[i].dataset.tipe === tipe);
-    }
-    $('hargaBox').classList.toggle('on', tipe === 'premium');
-  });
+var MY_SUBMISSION_KEY = 'an_my_submissions';
+var POLLING_INTERVAL = 30000; // 30 detik
+var pollingTimer = null;
+var isPolling = false;
+
+// ============================================================
+// SUBMISSION MANAGEMENT (localStorage)
+// ============================================================
+function ambilSubmissionSaya(){
+  try {
+    return JSON.parse(localStorage.getItem(MY_SUBMISSION_KEY) || '[]');
+  } catch(e){ return []; }
 }
 
-var form = $('formSubmit');
-if(form){
-  form.addEventListener('submit', async function(e){
-    e.preventDefault();
-
-    var nama = $('nama').value.trim();
-    var deskripsi = $('deskripsi').value.trim();
-    var ikon = $('ikon').value.trim();
-    var kategori = $('kategori').value;
-    var link_download = $('link_download').value.trim();
-    var harga = tipe === 'premium' ? parseInt($('harga').value) : 0;
-    var dev_nama = $('dev_nama').value.trim();
-    var dev_kontak = $('dev_kontak').value.trim();
-    var dev_bukti = $('dev_bukti').value.trim();
-
-    if(!nama || !deskripsi || !ikon || !kategori || !link_download || !dev_nama || !dev_kontak){
-      toast('Isi semua field wajib (*)', true); return;
+function simpanSubmissionSaya(data){
+  try {
+    var arr = ambilSubmissionSaya();
+    var idx = -1;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === data.id) { idx = i; break; }
     }
-    if(tipe === 'premium' && (!harga || harga < 1000)){
-      toast('Harga minimal Rp1.000', true); return;
-    }
-    if(link_download.indexOf('http') !== 0){
-      toast('Link harus dimulai http/https', true); return;
-    }
+    if (idx >= 0) arr[idx] = data;
+    else arr.push(data);
+    localStorage.setItem(MY_SUBMISSION_KEY, JSON.stringify(arr));
+  } catch(e){}
+}
 
-    var btn = $('btnSubmit');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+function hapusSubmission(id){
+  try {
+    var arr = ambilSubmissionSaya();
+    arr = arr.filter(function(x){ return x.id !== id; });
+    localStorage.setItem(MY_SUBMISSION_KEY, JSON.stringify(arr));
+  } catch(e){}
+}
 
+// ============================================================
+// 🎯 POLLING REAL-TIME
+// ============================================================
+function mulaiPolling(){
+  if (pollingTimer) clearInterval(pollingTimer);
+  
+  var subs = ambilSubmissionSaya();
+  if (!subs.length) {
+    console.log('⏸️ Belum ada submission — polling gak jalan');
+    return;
+  }
+  
+  console.log('🎯 Mulai polling tiap', POLLING_INTERVAL / 1000, 'detik');
+  $('liveIndicator').style.display = 'flex';
+  
+  pollingTimer = setInterval(function(){
+    // Jangan polling kalau tab APK lagi gak fokus
+    if (document.hidden) {
+      console.log('⏸️ Tab gak fokus — skip polling');
+      return;
+    }
+    console.log('🔄 Polling...');
+    cekStatusSubmission(true); // true = auto mode (silent)
+  }, POLLING_INTERVAL);
+}
+
+function stopPolling(){
+  if (pollingTimer) {
+    clearInterval(pollingTimer);
+    pollingTimer = null;
+    console.log('⏹️ Polling distop');
+  }
+  $('liveIndicator').style.display = 'none';
+}
+
+// Cek status lagi jalan → stop polling
+// Resume lagi waktu tab jadi fokus
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden) {
+    console.log('👁️ Tab fokus — cek status');
+    cekStatusSubmission(true);
+  }
+});
+
+// ============================================================
+// CEK STATUS SUBMISSION
+// ============================================================
+async function cekStatusSubmission(silent){
+  if (isPolling) {
+    console.log('⏸️ Cek lagi jalan — skip');
+    return;
+  }
+  isPolling = true;
+  
+  var subs = ambilSubmissionSaya();
+  if (!subs.length) {
+    $('statusSection').style.display = 'none';
+    isPolling = false;
+    stopPolling();
+    return;
+  }
+
+  if (!silent) console.log('🔍 Cek', subs.length, 'submission...');
+
+  var adaPerubahan = false;
+  var statusList = $('statusList');
+  var html = '';
+
+  for (var i = 0; i < subs.length; i++) {
+    var sub = subs[i];
     try {
-      var res = await fetch(SB_URL + '/rest/v1/aplikasi', {
-        method: 'POST',
+      var res = await fetch(SB_URL + '/rest/v1/aplikasi?id=eq.' + encodeURIComponent(sub.id) + '&select=*', {
         headers: {
           'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + SB_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify({
-          nama: nama, deskripsi: deskripsi, ikon: ikon, kategori: kategori,
-          tipe: tipe, harga: harga || 0, link_download: link_download,
-          developer_nama: dev_nama, developer_kontak: dev_kontak,
-          developer_bukti: dev_bukti || null, status: 'pending'
-        })
+          'Authorization': 'Bearer ' + SB_KEY
+        }
       });
+      var data = await res.json();
 
-      if(!res.ok){
-        var err = await res.json().catch(function(){ return {}; });
-        throw new Error(err.message || 'Gagal kirim (' + res.status + ')');
+      if (!data || !data.length) {
+        html += '<div class="status-item"><b>' + escapeHtml(sub.nama) + '</b> — <span style="color:#ff8a8a">Dihapus</span></div>';
+        hapusSubmission(sub.id);
+        continue;
       }
 
-      toast('✅ Aplikasi terkirim! Tunggu review admin.', false, true);
+      var app = data[0];
+      var statusBaru = (app.status || 'pending').toLowerCase();
+      var statusLama = (sub.status || 'pending').toLowerCase();
 
-      form.reset();
-      tipe = 'gratis';
-      var buttons = document.querySelectorAll('#tipePilih button');
-      for(var i = 0; i < buttons.length; i++){
-        buttons[i].classList.toggle('on', buttons[i].dataset.tipe === 'gratis');
+      sub.status = statusBaru;
+      sub.nama = app.nama;
+      simpanSubmissionSaya(sub);
+
+      // Kalau status berubah → notif
+      if (statusLama !== statusBaru) {
+        adaPerubahan = true;
+        if (statusBaru === 'approved') {
+          tampilNotif('🎉', 'Aplikasi Kamu Sudah Publish!', 'App "' + app.nama + '" udah tayang di katalog AppNesia.', 'ok');
+        } else if (statusBaru === 'rejected') {
+          tampilNotif('❌', 'Aplikasi Kamu Ditolak', 'App "' + app.nama + '" ditolak admin.', 'err');
+        } else if (statusBaru === 'pending' && statusLama !== 'pending') {
+          tampilNotif('⏳', 'Status Direset', 'App "' + app.nama + '" kembali ke pending.', 'info');
+        }
       }
-      $('hargaBox').classList.remove('on');
 
-      setTimeout(function(){
-        window.location.href = 'submit-sukses.html';
-      }, 2000);
+      var statusLabel = statusBaru === 'approved' ? '✅ Approved' : (statusBaru === 'rejected' ? '❌ Rejected' : '⏳ Pending');
+      var statusClass = 'status-' + statusBaru;
+      var catatan = app.catatan_admin ? '<br><small style="color:#dcc9c9">Catatan: ' + escapeHtml(app.catatan_admin) + '</small>' : '';
+      html += '<div class="status-item"><b>' + escapeHtml(app.nama) + '</b> — <span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' + catatan + '</div>';
 
-    } catch(err){
-      console.error(err);
-      toast('❌ ' + err.message, true);
-      btn.disabled = false;
-      btn.innerHTML = '📤 Kirim Aplikasi';
+    } catch(e) {
+      html += '<div class="status-item"><b>' + escapeHtml(sub.nama) + '</b> — <span style="color:#dcc9c9">Gagal cek</span></div>';
     }
-  });
+  }
+
+  statusList.innerHTML = html;
+  $('statusSection').style.display = 'block';
+
+  if (adaPerubahan && silent) {
+    console.log('🎉 Status berubah — notif muncul');
+  }
+  
+  isPolling = false;
 }
+
+function cekStatusSekarang(){
+  cekStatusSubmission(false);
+  toast('🔄 Cek status...', false, false);
+}
+
+function escapeHtml(s){
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ============================================================
+// NOTIF BANNER
+// ============================================================
+function tampilNotif(emoji, judul, pesan, tipe){
+  var banner = $('notifBanner');
+  $('notifEmoji').textContent = emoji;
+  $('notifJudul').textContent = judul;
+  $('notifPesan').textContent = pesan;
+  banner.className = 'notif-banner ' + (tipe || 'info');
+  void banner.offsetWidth;
+  banner.classList.add('on');
+
+  // Getar HP
+  try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch(e){}
+
+  clearTimeout(tampilNotif._t);
+  tampilNotif._t = setTimeout(function(){ tutupNotif(); }, 8000);
+}
+
+function tutupNotif(){
+  var banner = $('notifBanner');
+  banner.classList.remove('on');
+}
+
+// ============================================================
+// FORM
+// ============================================================
+$('tipePilih').addEventListener('click', function(e){
+  var btn = e.target.closest('button[data-tipe]');
+  if(!btn) return;
+  tipe = btn.dataset.tipe;
+  var buttons = document.querySelectorAll('#tipePilih button');
+  for(var i = 0; i < buttons.length; i++){
+    buttons[i].classList.toggle('on', buttons[i].dataset.tipe === tipe);
+  }
+  $('hargaBox').classList.toggle('on', tipe === 'premium');
+});
+
+$('formSubmit').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  var nama = $('nama').value.trim();
+  var deskripsi = $('deskripsi').value.trim();
+  var ikon = $('ikon').value.trim();
+  var kategori = $('kategori').value;
+  var link_download = $('link_download').value.trim();
+  var harga = tipe === 'premium' ? parseInt($('harga').value) : 0;
+  var dev_nama = $('dev_nama').value.trim();
+  var dev_kontak = $('dev_kontak').value.trim();
+  var dev_bukti = $('dev_bukti').value.trim();
+
+  if(!nama || !deskripsi || !ikon || !kategori || !link_download || !dev_nama || !dev_kontak){
+    toast('Isi semua field wajib (*)', true); return;
+  }
+  if(tipe === 'premium' && (!harga || harga < 1000)){
+    toast('Harga minimal Rp1.000', true); return;
+  }
+  if(link_download.indexOf('http') !== 0){
+    toast('Link harus dimulai http/https', true); return;
+  }
+
+  var btn = $('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+
+  try {
+    var res = await fetch(SB_URL + '/rest/v1/aplikasi', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        nama: nama, deskripsi: deskripsi, ikon: ikon, kategori: kategori,
+        tipe: tipe, harga: harga || 0, link_download: link_download,
+        developer_nama: dev_nama, developer_kontak: dev_kontak,
+        developer_bukti: dev_bukti || null, status: 'pending'
+      })
+    });
+
+    if(!res.ok){
+      var err = await res.json().catch(function(){ return {}; });
+      throw new Error(err.message || 'Gagal kirim (' + res.status + ')');
+    }
+
+    var result = await res.json();
+    var appBaru = result[0];
+
+    simpanSubmissionSaya({
+      id: appBaru.id,
+      nama: appBaru.nama,
+      developer_kontak: dev_kontak,
+      status: 'pending',
+      submitted_at: new Date().toISOString()
+    });
+
+    toast('✅ Aplikasi terkirim! Tunggu review admin.', false, true);
+
+    $('formSubmit').reset();
+    tipe = 'gratis';
+    var buttons = document.querySelectorAll('#tipePilih button');
+    for(var i = 0; i < buttons.length; i++){
+      buttons[i].classList.toggle('on', buttons[i].dataset.tipe === 'gratis');
+    }
+    $('hargaBox').classList.remove('on');
+
+    // Refresh status + start polling
+    setTimeout(function(){ 
+      cekStatusSubmission(false); 
+      mulaiPolling();
+    }, 500);
+
+    setTimeout(function(){
+      window.location.href = 'submit-sukses.html';
+    }, 2000);
+
+  } catch(err){
+    console.error(err);
+    toast('❌ ' + err.message, true);
+    btn.disabled = false;
+    btn.innerHTML = '📤 Kirim Aplikasi';
+  }
+});
 
 function toast(pesan, isErr, isOk){
   var el = $('toast');
@@ -321,4 +557,4 @@ function toast(pesan, isErr, isOk){
 }
 </script>
 </body>
-  </html>
+    </html>

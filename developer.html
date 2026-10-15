@@ -4,6 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Submit App - AppNesia Developer</title>
+
+<!-- ============================================================ -->
+<!-- 🛡️ SHIELD — CEK APK SEBELUM HALAMAN RENDER                 -->
+<!-- ============================================================ -->
+<script>
+(function(){
+  var diAPK = false;
+  var ua = "";
+  try { ua = navigator.userAgent.toLowerCase(); } catch(e){}
+
+  // === CEK 1: Cordova ===
+  if (typeof window.cordova !== "undefined") diAPK = true;
+
+  // === CEK 2: Capacitor (ketat) ===
+  try {
+    if (window.Capacitor) {
+      if (window.Capacitor.platform === "android" || window.Capacitor.platform === "ios") diAPK = true;
+      if (typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()) diAPK = true;
+      if (typeof window.Capacitor.isNative === "function" && window.Capacitor.isNative()) diAPK = true;
+    }
+  } catch(e){}
+
+  // === CEK 3: Protocol file:// (APK lokal) ===
+  try { if (window.location.protocol === "file:") diAPK = true; } catch(e){}
+
+  // === CEK 4: Android WebView ===
+  if (ua.indexOf("; wv)") !== -1) diAPK = true;
+
+  // === CEK 5: Capacitor di user agent ===
+  if (ua.indexOf("capacitor") !== -1) diAPK = true;
+
+  // === CEK 6: Cordova / PhoneGap di user agent ===
+  if (ua.indexOf("cordova") !== -1 || ua.indexOf("phonegap") !== -1) diAPK = true;
+
+  // === CEK 7: Android app context (custom bridge) ===
+  try { if (typeof window.Android !== "undefined") diAPK = true; } catch(e){}
+  try { if (typeof window.AndroidBridge !== "undefined") diAPK = true; } catch(e){}
+
+  // === CEK 8: Capacitor di URL (kalau ada) ===
+  try {
+    if (window.location.href.indexOf("capacitor://") !== -1) diAPK = true;
+    if (window.location.href.indexOf("ionic://") !== -1) diAPK = true;
+  } catch(e){}
+
+  console.log("🛡️ SHIELD:", diAPK ? "APK ✅ — Form dibuka" : "Browser ❌ — DIGANTI");
+
+  if (!diAPK) {
+    // === BLOKIR TOTAL ===
+    try { window.stop(); } catch(e){}
+
+    var htmlBlock = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Cuma di Aplikasi - AppNesia</title><style>body{margin:0;background:#1a0808;color:#f5eaea;font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;box-sizing:border-box}.box{max-width:420px;width:100%;background:#2a0f0f;border:1px solid #4a1c1c;border-radius:20px;padding:40px 24px;box-sizing:border-box}.ikon{font-size:80px;margin-bottom:20px;animation:shake 1s ease infinite}@keyframes shake{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}h1{color:#ff5a4d;margin:0 0 12px;font-size:22px;line-height:1.3}p{color:#dcc9c9;font-size:15px;line-height:1.6;margin:0 0 16px}p b{color:#f5a623}.info{background:#1a0808;border:1px solid #4a1c1c;border-radius:12px;padding:14px 16px;margin:20px 0;font-size:13px;color:#b9a0a0;text-align:left;line-height:1.6}.info b{color:#f5a623}.btn{display:inline-block;padding:14px 28px;background:#ff5a4d;color:#1a0808;text-decoration:none;border-radius:12px;font-weight:700;font-size:15px;margin-top:8px}.btn:active{opacity:.85}</style></head><body><div class="box"><div class="ikon">📱</div><h1>Aplikasi Ini Cuma Bisa Dibuka di HP</h1><p>Halaman ini bagian dari <b>aplikasi AppNesia Developer</b>, bukan website.</p><div class="info"><b>Kenapa?</b><br>Form submit aplikasi butuh akses ke fitur HP yang gak bisa dilakukan dari browser biasa. Silakan download aplikasinya dulu untuk kirim aplikasi ke AppNesia.</div><a href="https://downloadeveloper.pages.dev" class="btn">📥 Download Aplikasi Developer</a></div></body></html>';
+
+    try {
+      document.open();
+      document.write(htmlBlock);
+      document.close();
+    } catch(e) {
+      // Fallback kalau document.write gak bisa
+      document.documentElement.innerHTML = htmlBlock.replace(/<!DOCTYPE html>|<\/?html[^>]*>|<\/?head[^>]*>|<\/?body[^>]*>/gi, "");
+    }
+    return;
+  }
+})();
+</script>
+
+<!-- ============================================================ -->
+<!-- CSS ASLI — CUMA JALAN KALAU LOLOS SHIELD                    -->
+<!-- ============================================================ -->
 <style>
 :root{--bg:#1a0808;--surface:#2a0f0f;--line:#4a1c1c;--text:#f5eaea;--muted:#b9a0a0;--accent:#ff5a4d;--amber:#f5a623;--ok:#7bd88f}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -11,7 +79,6 @@ html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-u
 body{padding:calc(72px + env(safe-area-inset-top,0)) 16px 40px;max-width:640px;margin:0 auto}
 header{position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0);z-index:10}
 .in{max-width:640px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px}
-.back{color:var(--text);text-decoration:none;font-size:22px;line-height:1}
 .brand{font-weight:700;font-size:17px;flex:1}
 h1{font-size:24px;margin:8px 0 4px}
 .sub{color:var(--muted);font-size:14px;margin:0 0 20px;line-height:1.5}
@@ -41,175 +108,99 @@ select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;u
 .info-box b{color:var(--amber)}
 .spinner{display:inline-block;width:16px;height:16px;border:3px solid #1a0808;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* === BLOKIR BROWSER === */
-.browser-block{position:fixed;inset:0;z-index:99999;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;padding:30px 24px;text-align:center}
-.browser-block.on{display:flex}
-.browser-block .ikon{font-size:80px;margin-bottom:20px;animation:shake .8s ease infinite}
-@keyframes shake{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
-.browser-block h2{color:var(--accent);font-size:22px;margin:0 0 12px;max-width:340px}
-.browser-block p{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 10px;max-width:340px}
-.browser-block .box-info{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:20px;font-size:13px;color:#dcc9c9;max-width:340px;text-align:left;line-height:1.6}
-.browser-block .box-info b{color:var(--amber)}
-.browser-block .btn-dl{display:inline-block;margin-top:20px;padding:14px 28px;background:var(--accent);color:#1a0808;text-decoration:none;border-radius:12px;font-weight:700;font-size:15px}
 </style>
 </head>
 <body>
 
-<!-- === OVERLAY BLOKIR BROWSER === -->
-<div class="browser-block" id="browserBlock">
-  <div class="ikon">📱</div>
-  <h2>Aplikasi Ini Cuma Bisa Dibuka di HP</h2>
-  <p>Halaman ini bagian dari <b>aplikasi AppNesia Developer</b>, bukan website.</p>
-  <p>Silakan download aplikasinya dulu.</p>
-  <div class="box-info">
-    <b>Kenapa?</b><br>
-    Form submit aplikasi butuh akses ke file & fitur HP yang gak bisa dilakukan dari browser biasa. Unduh aplikasinya biar bisa kirim aplikasi ke AppNesia.
-  </div>
-  <a href="https://downloadeveloper.pages.dev" class="btn-dl">📥 Download Aplikasi Developer</a>
+<header><div class="in">
+<span class="brand">📤 Submit App Developer</span>
+</div></header>
+
+<h1>Kirim Aplikasi ke AppNesia</h1>
+<p class="sub">Isi form di bawah. Aplikasi kamu akan di-review admin sebelum dipublikasikan.</p>
+
+<div class="info-box">
+  <b>⚠️ Penting:</b> Dengan mengirim form ini, kamu menyatakan aplikasi ini milikmu atau kamu punya izin untuk publish. AppNesia tidak bertanggung jawab atas pelanggaran hak cipta.
 </div>
 
-<!-- === KONTEN ASLI (disembunyikan default) === -->
-<div id="kontenUtama" style="display:none">
-  <header><div class="in">
-  <a href="#" class="back" onclick="return false">📤</a>
-  <span class="brand">Submit App Developer</span>
-  </div></header>
+<form id="formSubmit" onsubmit="return false;">
+  <div class="card">
+    <h3>📱 Info Aplikasi</h3>
+    <p class="card-sub">Data aplikasi yang mau dipublikasikan</p>
 
-  <h1>Kirim Aplikasi ke AppNesia</h1>
-  <p class="sub">Isi form di bawah. Aplikasi kamu akan di-review admin sebelum dipublikasikan.</p>
+    <label for="nama">Nama Aplikasi *</label>
+    <input type="text" id="nama" required maxlength="60" placeholder="Contoh: Mobile Legends">
+    <div class="hint">Maks 60 karakter</div>
 
-  <div class="info-box">
-    <b>⚠️ Penting:</b> Dengan mengirim form ini, kamu menyatakan aplikasi ini milikmu atau kamu punya izin untuk publish. AppNesia tidak bertanggung jawab atas pelanggaran hak cipta.
+    <label for="deskripsi">Deskripsi Singkat *</label>
+    <textarea id="deskripsi" required maxlength="200" placeholder="Contoh: Game MOBA 5 lawan 5 yang seru"></textarea>
+    <div class="hint">Maks 200 karakter</div>
+
+    <label for="ikon">Ikon / Emoji *</label>
+    <input type="text" id="ikon" required maxlength="10" placeholder="Contoh: 🎮 atau URL gambar">
+    <div class="hint">Emoji (contoh: 🎮 🎯 🚀) atau URL gambar</div>
+
+    <label for="kategori">Kategori *</label>
+    <select id="kategori" required>
+      <option value="">-- Pilih kategori --</option>
+      <option value="belanja">🛍️ Belanja</option>
+      <option value="keuangan">💳 Keuangan</option>
+      <option value="perjalanan">🧭 Perjalanan</option>
+      <option value="sosial">💬 Sosial</option>
+      <option value="hiburan">🎬 Hiburan</option>
+      <option value="produktif">🗂️ Produktivitas</option>
+      <option value="game">🎮 Game</option>
+    </select>
+
+    <label for="link_download">Link Download *</label>
+    <input type="url" id="link_download" required placeholder="https://play.google.com/store/apps/... atau https://drive.google.com/...">
+    <div class="hint">Link Play Store, Google Drive, MediaFire, atau hosting kamu</div>
   </div>
 
-  <form id="formSubmit" onsubmit="return false;">
-    <div class="card">
-      <h3>📱 Info Aplikasi</h3>
-      <p class="card-sub">Data aplikasi yang mau dipublikasikan</p>
+  <div class="card">
+    <h3>💰 Tipe Aplikasi</h3>
+    <p class="card-sub">Kamu yang tentukan, gratis atau premium</p>
 
-      <label for="nama">Nama Aplikasi *</label>
-      <input type="text" id="nama" required maxlength="60" placeholder="Contoh: Mobile Legends">
-      <div class="hint">Maks 60 karakter</div>
-
-      <label for="deskripsi">Deskripsi Singkat *</label>
-      <textarea id="deskripsi" required maxlength="200" placeholder="Contoh: Game MOBA 5 lawan 5 yang seru"></textarea>
-      <div class="hint">Maks 200 karakter</div>
-
-      <label for="ikon">Ikon / Emoji *</label>
-      <input type="text" id="ikon" required maxlength="10" placeholder="Contoh: 🎮 atau URL gambar">
-      <div class="hint">Emoji (contoh: 🎮 🎯 🚀) atau URL gambar</div>
-
-      <label for="kategori">Kategori *</label>
-      <select id="kategori" required>
-        <option value="">-- Pilih kategori --</option>
-        <option value="belanja">🛍️ Belanja</option>
-        <option value="keuangan">💳 Keuangan</option>
-        <option value="perjalanan">🧭 Perjalanan</option>
-        <option value="sosial">💬 Sosial</option>
-        <option value="hiburan">🎬 Hiburan</option>
-        <option value="produktif">🗂️ Produktivitas</option>
-        <option value="game">🎮 Game</option>
-      </select>
-
-      <label for="link_download">Link Download *</label>
-      <input type="url" id="link_download" required placeholder="https://play.google.com/store/apps/... atau https://drive.google.com/...">
-      <div class="hint">Link Play Store, Google Drive, MediaFire, atau hosting kamu</div>
+    <label>Tipe *</label>
+    <div class="tipe-pilih" id="tipePilih">
+      <button type="button" data-tipe="gratis" class="on">🆓 Gratis</button>
+      <button type="button" data-tipe="premium">💰 Premium</button>
     </div>
 
-    <div class="card">
-      <h3>💰 Tipe Aplikasi</h3>
-      <p class="card-sub">Kamu yang tentukan, gratis atau premium</p>
-
-      <label>Tipe *</label>
-      <div class="tipe-pilih" id="tipePilih">
-        <button type="button" data-tipe="gratis" class="on">🆓 Gratis</button>
-        <button type="button" data-tipe="premium">💰 Premium</button>
-      </div>
-
-      <div class="harga-box" id="hargaBox">
-        <label for="harga">Harga (Rp) *</label>
-        <input type="number" id="harga" min="1000" step="500" placeholder="Contoh: 15000">
-        <div class="hint">Minimal Rp1.000. Kamu tentukan harga aplikasimu</div>
-      </div>
+    <div class="harga-box" id="hargaBox">
+      <label for="harga">Harga (Rp) *</label>
+      <input type="number" id="harga" min="1000" step="500" placeholder="Contoh: 15000">
+      <div class="hint">Minimal Rp1.000. Kamu tentukan harga aplikasimu</div>
     </div>
+  </div>
 
-    <div class="card">
-      <h3>👤 Info Developer</h3>
-      <p class="card-sub">Biar admin bisa hubungi kamu kalau ada masalah</p>
+  <div class="card">
+    <h3>👤 Info Developer</h3>
+    <p class="card-sub">Biar admin bisa hubungi kamu kalau ada masalah</p>
 
-      <label for="dev_nama">Nama / Nama Developer *</label>
-      <input type="text" id="dev_nama" required maxlength="60" placeholder="Contoh: Ramadhan Studio">
+    <label for="dev_nama">Nama / Nama Developer *</label>
+    <input type="text" id="dev_nama" required maxlength="60" placeholder="Contoh: Ramadhan Studio">
 
-      <label for="dev_kontak">Kontak (WhatsApp/Email) *</label>
-      <input type="text" id="dev_kontak" required maxlength="100" placeholder="Contoh: 0812xxx atau email@gmail.com">
+    <label for="dev_kontak">Kontak (WhatsApp/Email) *</label>
+    <input type="text" id="dev_kontak" required maxlength="100" placeholder="Contoh: 0812xxx atau email@gmail.com">
 
-      <label for="dev_bukti">Bukti Kepemilikan</label>
-      <input type="url" id="dev_bukti" placeholder="https://play.google.com/store/apps/developer?id=...">
-      <div class="hint">Link ke halaman developer di Play Store (opsional tapi disarankan)</div>
-    </div>
+    <label for="dev_bukti">Bukti Kepemilikan</label>
+    <input type="url" id="dev_bukti" placeholder="https://play.google.com/store/apps/developer?id=...">
+    <div class="hint">Link ke halaman developer di Play Store (opsional tapi disarankan)</div>
+  </div>
 
-    <button type="submit" class="btn" id="btnSubmit">📤 Kirim Aplikasi</button>
-  </form>
-</div>
+  <button type="submit" class="btn" id="btnSubmit">📤 Kirim Aplikasi</button>
+</form>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
-// 🔒 DETEKSI APK vs BROWSER
-// ============================================================
-(function deteksiEnvironment(){
-  var diAPK = false;
-
-  // 1. Cek Cordova
-  if(typeof window.cordova !== 'undefined') diAPK = true;
-
-  // 2. Cek Capacitor
-  if(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function'){
-    if(window.Capacitor.isNativePlatform()) diAPK = true;
-  }
-
-  // 3. Cek protocol file:// (APK lokal)
-  if(window.location.protocol === 'file:') diAPK = true;
-
-  // 4. Cek user agent Android WebView
-  var ua = navigator.userAgent.toLowerCase();
-  if(ua.indexOf('; wv)') !== -1) diAPK = true;
-
-  // 5. Cek Capacitor di user agent
-  if(ua.indexOf('capacitor') !== -1) diAPK = true;
-
-  // 6. Cek localStorage flag (di-set saat pertama kali APK buka)
-  if(localStorage.getItem('is_appnesia_app') === 'yes') diAPK = true;
-
-  console.log('🔍 Deteksi environment:', diAPK ? 'APK ✅' : 'Browser ❌');
-
-  if(!diAPK){
-    // BUKAN di APK → blokir
-    document.getElementById('browserBlock').classList.add('on');
-    document.getElementById('kontenUtama').style.display = 'none';
-    document.body.style.overflow = 'hidden';
-  } else {
-    // DI APK → tampilkan form
-    document.getElementById('browserBlock').classList.remove('on');
-    document.getElementById('kontenUtama').style.display = 'block';
-    document.body.style.overflow = '';
-    // Simpan flag biar konsisten
-    try { localStorage.setItem('is_appnesia_app', 'yes'); } catch(e){}
-  }
-})();
-
-// ============================================================
-// KONFIGURASI
-// ============================================================
 var SB_URL = 'https://ddnqfpeszktuvsypseyc.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkbnFmcGVzemt0dXZzeXBzZXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0MDMxNzgsImV4cCI6MjEwNjk3OTE3OH0.Lg2HCI2qCC4UEP_sN0IipIECKW49QCoHO48R5qVcTt0';
 
 var $ = function(id){ return document.getElementById(id); };
 var tipe = 'gratis';
 
-// Pilih tipe
 var tipePilih = $('tipePilih');
 if(tipePilih){
   tipePilih.addEventListener('click', function(e){
@@ -224,7 +215,6 @@ if(tipePilih){
   });
 }
 
-// Submit
 var form = $('formSubmit');
 if(form){
   form.addEventListener('submit', async function(e){
